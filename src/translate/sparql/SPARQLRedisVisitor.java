@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.Queue;
 
 import main.ShardedRedisTripleStore;
 import main.DataTypes.GraphResult;
 
 import redis.clients.jedis.Jedis;
 import translate.redis.BGP;
+import translate.redis.Project;
 import translate.redis.RedisOP;
 
 
@@ -86,31 +88,37 @@ public class SPARQLRedisVisitor implements OpVisitor
 	
 	}
 	
-	public GraphResult execute(ShardedRedisTripleStore ts){
-		String graphPatternKey = "working:graphResult";
-		String scratchKey = "working:scratch";
-		// prime the graph pattern with empty input
+	private String _execute(ShardedRedisTripleStore ts, String keyspace, String graphPatternKey){
+		RedisOP op = redisOpStack.pop();
+		if (!redisOpStack.isEmpty()){
+			graphPatternKey = _execute(ts, keyspace, graphPatternKey);
+		}
+		return op.execute(ts, keyspace, graphPatternKey);
+	}
+	
+	public String execute(ShardedRedisTripleStore ts){
+		String keyspace = "redisSparql:";
+		String graphPatternKey = keyspace + "working:graphResult";
+		// make sure the initial graph pattern input is empty
 		for(Jedis j: ts.shards){
-			j.rpush(graphPatternKey, "[]"); // empty variable name list
-			j.rpush(graphPatternKey, ""); // empty variable value list
+			j.del(graphPatternKey);
 		}
-		
-		while(!redisOpStack.isEmpty()){
-			RedisOP op = redisOpStack.pop();
-			op.execute(ts, graphPatternKey, scratchKey);
+		if (!redisOpStack.isEmpty()){
+			return _execute(ts, keyspace, graphPatternKey);
 		}
-		
 		return null;
 	}
 	
 	public void visit(OpProject arg0) 
 	{
 		System.out.println(">>>> project = " + arg0.getVars());
+		Project pOp = new Project();
 		for (Var v : arg0.getVars()) 
 		{
 			System.out.println("====== Projecting = "+v.getName());
-		//	sqlOpStack.peek().projectVariable(v.getName());
+			pOp.projectVariable(v.getName());
 		}
+		this.redisOpStack.push(pOp);
 	}
 
 	

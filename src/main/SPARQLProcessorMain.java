@@ -146,7 +146,8 @@ public class SPARQLProcessorMain {
 		String bsbm00 = 
 				"PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/> " +
 				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-				"SELECT ?product ?label " +
+				//"SELECT ?product ?label " +
+				"SELECT ?label " +
 				"WHERE { " +
 				"?product rdfs:label ?label ." +
 				"?product a bsbm-inst:ProductType10 ." +

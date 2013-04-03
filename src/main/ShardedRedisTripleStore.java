@@ -34,6 +34,7 @@ public class ShardedRedisTripleStore {
 		// ARGV[4] = 1 if object is literal, 0 otherwise
 		String insertTripleScript = ""
 				+ "local function getLiteralAlias(l) \n"
+				+ "  l = string.sub(l, 2, -2) \n"
 				+ "  if redis.call('hexists', 'literalAliases', l) == 1 then \n"
 				+ "    return redis.call('hget', 'literalAliases', l) \n"
 				+ "  end \n"
