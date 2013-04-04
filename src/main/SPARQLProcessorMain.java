@@ -145,12 +145,16 @@ public class SPARQLProcessorMain {
 		
 		String bsbm00 = 
 				"PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/> " +
+				"PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> " +
 				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
 				//"SELECT ?product ?label " +
-				"SELECT ?label " +
+				//"SELECT ?label " +
+				"SELECT * " +
 				"WHERE { " +
 				"?product rdfs:label ?label ." +
-				"?product a bsbm-inst:ProductType10 ." +
+				"?product bsbm:productPropertyNumeric1 ?value1 . " +
+				"FILTER (?value1 > 100) " +
+				//"?product a bsbm-inst:ProductType10 ." +
 				"} " ;
 		
 		String bsbm0 = 
@@ -159,7 +163,7 @@ public class SPARQLProcessorMain {
 				"SELECT DISTINCT ?product ?label " +
 				"WHERE { " +
 				"?product rdfs:label ?label ." +
-				"?product a bsbm-inst:ProductType100 ." +
+				"?product a bsbm-inst:ProductType10 ." +
 				"} " ;
 		
 		String bsbm1 = 
@@ -167,14 +171,15 @@ public class SPARQLProcessorMain {
 				"PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> " +
 				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
 				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-				"SELECT DISTINCT ?product ?label " +
+				"SELECT DISTINCT ?product ?label ?value" +
 				"WHERE { " +
 				"?product rdfs:label ?label ." +
-				"?product a bsbm-inst:ProductType100 ." +
-				"?product bsbm:productFeature bsbm-inst:ProductFeature1 ." +
-				"?product bsbm:productFeature bsbm-inst:ProductFeature2 . " +
+				//"?product a bsbm-inst:ProductType10 ." +
+				//"?product bsbm:productFeature bsbm-inst:ProductFeature1 ." +
+				//"?product bsbm:productFeature bsbm-inst:ProductFeature2 . " +
 				"?product bsbm:productPropertyNumeric1 ?value1 . " +
-				"FILTER (?value1 > 100) " +
+				"FILTER ((?value1 > 100) || (?value1 < 90)) " +
+				//"FILTER (?value1 > 100) " +
 				"} " ;
 				//"ORDER BY ?label " +
 				//"LIMIT 10";

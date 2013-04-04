@@ -17,6 +17,8 @@ import main.DataTypes.GraphResult;
 
 import redis.clients.jedis.Jedis;
 import translate.redis.BGP;
+import translate.redis.Distinct;
+import translate.redis.Filter;
 import translate.redis.Project;
 import translate.redis.RedisOP;
 
@@ -115,7 +117,6 @@ public class SPARQLRedisVisitor implements OpVisitor
 		Project pOp = new Project();
 		for (Var v : arg0.getVars()) 
 		{
-			System.out.println("====== Projecting = "+v.getName());
 			pOp.projectVariable(v.getName());
 		}
 		this.redisOpStack.push(pOp);
@@ -128,7 +129,6 @@ public class SPARQLRedisVisitor implements OpVisitor
 		BGP redisBGP = new BGP();
 		for (Triple t : bgp.getPattern()) 
 		{
-			//System.out.println(t);
 			try 
 			{
 				redisBGP.addTriple(t);
@@ -142,31 +142,30 @@ public class SPARQLRedisVisitor implements OpVisitor
 		
 		this.redisOpStack.push(redisBGP);
 	}
+	
+	public void visit(OpReduced arg0) 
+	{
+		System.out.println(">>>> reduced");
+		this.redisOpStack.push(new Distinct());
+	}
+	
+	public void visit(OpDistinct arg0) 
+	{
+		System.out.println(">>>> distinct");
+		this.redisOpStack.push(new Distinct());
+	}
 
 	public void visit(OpFilter arg0) 
 	{
 		System.out.println(">>>> filter = " + arg0.getExprs());
 		//Map<String, SqlExpr> aggregatorMap = sqlOpStack.peek().getAggregatorMap();
+		Filter f = new Filter();
 		for(Expr e: arg0.getExprs()) 
 		{
 			System.out.println(">>>>>> expr = " + e);
-			//SqlExpr expr = new SqlExpr(baseURI);
-//			e.visit(expr);
-//			if(aggregatorMap == null)
-//			{
-//				sqlOpStack.peek().addFilter(expr);
-//			}
-//			else if(aggregatorMap.isEmpty())
-//			{
-//				sqlOpStack.peek().addFilter(expr);
-//			}
-//			else
-//			{
-//				sqlOpStack.peek().addHaving(expr);
-//			}
-			
+			f.addFilter(e);
 		}
-		
+		this.redisOpStack.push(f);
 	}
 
 	public void visit(OpJoin arg0) 
@@ -266,17 +265,7 @@ public class SPARQLRedisVisitor implements OpVisitor
 //	    }
 	}
 	
-	public void visit(OpReduced arg0) 
-	{
-		System.out.println(">>>> reduced  = " + arg0 );
-//		sqlOpStack.peek().distinct();
-	}
-	
-	public void visit(OpDistinct arg0) 
-	{
-		System.out.println(">>>> distinct  = " + arg0 );
-//		sqlOpStack.peek().distinct();
-	}
+
 
 	public void visit(OpSlice arg0) 
 	{

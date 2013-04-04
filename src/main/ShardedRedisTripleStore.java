@@ -34,7 +34,7 @@ public class ShardedRedisTripleStore {
 		// ARGV[4] = 1 if object is literal, 0 otherwise
 		String insertTripleScript = ""
 				+ "local function getLiteralAlias(l) \n"
-				+ "  l = string.sub(l, 2, -2) \n"
+				//+ "  l = string.sub(l, 2, -2) \n"
 				+ "  if redis.call('hexists', 'literalAliases', l) == 1 then \n"
 				+ "    return redis.call('hget', 'literalAliases', l) \n"
 				+ "  end \n"
@@ -134,7 +134,12 @@ public class ShardedRedisTripleStore {
 	}
 	
 	private String getLiteralAlias(Jedis db, Node n){
-		return n.toString();
+		
+		if (n.toString().contains("integer")){
+			@SuppressWarnings("unused")
+			int y = 0;
+		}
+		return n.getLiteralValue().toString();
 //		String type = n.getLiteralDatatypeURI();
 //		String name = n.getLiteralLexicalForm();
 //		String prefix = "";
