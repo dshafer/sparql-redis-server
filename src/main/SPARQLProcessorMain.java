@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import translate.redis.QueryResult;
 import translate.sparql.SPARQLVisitor;
 import translate.sparql.SPARQLRedisVisitor;
 
@@ -153,7 +154,7 @@ public class SPARQLProcessorMain {
 				"WHERE { " +
 				"?product rdfs:label ?label ." +
 				"?product bsbm:productPropertyNumeric1 ?value1 . " +
-				"FILTER (?value1 > 100) " +
+				//"FILTER (?value1 > 100) " +
 				//"?product a bsbm-inst:ProductType10 ." +
 				"} " ;
 		
@@ -174,12 +175,12 @@ public class SPARQLProcessorMain {
 				"SELECT DISTINCT ?product ?label ?value" +
 				"WHERE { " +
 				"?product rdfs:label ?label ." +
-				//"?product a bsbm-inst:ProductType10 ." +
-				//"?product bsbm:productFeature bsbm-inst:ProductFeature1 ." +
-				//"?product bsbm:productFeature bsbm-inst:ProductFeature2 . " +
+				"?product a bsbm-inst:ProductType10 ." +
+				"?product bsbm:productFeature bsbm-inst:ProductFeature1 ." +
+				"?product bsbm:productFeature bsbm-inst:ProductFeature2 . " +
 				"?product bsbm:productPropertyNumeric1 ?value1 . " +
 				"FILTER ((?value1 > 100) || (?value1 < 90)) " +
-				//"FILTER (?value1 > 100) " +
+				"FILTER (?value1 > 100) " +
 				"} " ;
 				//"ORDER BY ?label " +
 				//"LIMIT 10";
@@ -224,7 +225,25 @@ public class SPARQLProcessorMain {
 				"OPTIONAL { " +
 				" ?product bsbm:productFeature <ProductFeature2> ." +
 				" ?product rdfs:label ?testVar }" +
-				" FILTER (!bound(?testVar)) }";
+				//"FILTER (!bound(?testVar)) " +
+				"}";
+		
+		String dbPedia1 = "PREFIX db: <http://dbpedia.org/resource/> \n" +
+				"PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>  \n" +
+				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>  \n" +
+				"PREFIX cl: <http://dbpedia.org/resource/George_Clooney>  \n" +
+				 
+				"SELECT DISTINCT ?copain ?image WHERE {  \n" +
+				"?film ?p db:George_Clooney ;  \n" +
+				"      ?p2 ?copain;  \n" +
+				" a dbpedia-owl:TelevisionShow .  \n" +
+				"  ?copain a dbpedia-owl:Person ;  \n" +
+				"dbpedia-owl:thumbnail ?image.  \n" +
+				"		 \n" +
+				"  FILTER ( ?copain != db:George_Clooney ).  \n" +
+				"}  \n" +
+				"LIMIT 50  \n" +
+				"";	
 		
 				
 		Query q = QueryFactory.create(bsbm00);
@@ -233,11 +252,15 @@ public class SPARQLProcessorMain {
 		System.out.println(op.toString());
 		
 		System.out.println("Going to walk the tree: ");
-		SPARQLRedisVisitor v = new SPARQLRedisVisitor();
+		SPARQLRedisVisitor v = new SPARQLRedisVisitor(ts);
 		//SPARQLVisitor v = new SPARQLVisitor();
 		OpWalker.walk(op, v);
-		v.execute(ts);
-		System.out.println(v);
+		System.out.println("Map script is: \n" + v.luaMapScript());
+		QueryResult result = ts.execute(v);
+		
+		//v.execute(ts);
+		result.unalias(ts);
+		System.out.println(result.asTable());
 		
 
 	}

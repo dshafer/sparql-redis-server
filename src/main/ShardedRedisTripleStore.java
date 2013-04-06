@@ -2,11 +2,17 @@ package main;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Stack;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
+import translate.redis.QueryResult;
+import translate.sparql.SPARQLRedisVisitor;
 
 import java.io.UnsupportedEncodingException;
 import java.security.*;
+
+import main.DataTypes.GraphResult;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -98,7 +104,15 @@ public class ShardedRedisTripleStore {
 	}
 	
 	
-	
+	public String getStringFromAlias(String alias){
+		if(alias.startsWith("!")){
+			// this is a literal.  just strip the "!" and return
+			return alias.substring(1);
+		} else {
+			// this is a URI alias
+			return getUriNounFromAlias(aliasDb, alias);
+		}
+	}
 	
 	public String getAlias(Node n){
 		Jedis db = aliasDb;
@@ -127,27 +141,14 @@ public class ShardedRedisTripleStore {
 	
 	private String getUriAlias(Jedis db, Node n){
 		return shorten(db, "uri", n.toString());
-//		String ns = n.getNameSpace();
-//		String name = n.getLocalName();
-//		String prefix = shorten(db, "uriPrefix", ns);
-//		return prefix + "#" + name;
+	}
+	private String getUriNounFromAlias(Jedis db, String a){
+		return unshorten(db, "uri", a);
 	}
 	
 	private String getLiteralAlias(Jedis db, Node n){
 		
-		if (n.toString().contains("integer")){
-			@SuppressWarnings("unused")
-			int y = 0;
-		}
 		return n.getLiteralValue().toString();
-//		String type = n.getLiteralDatatypeURI();
-//		String name = n.getLiteralLexicalForm();
-//		String prefix = "";
-//		if (type != null){
-//			prefix = shorten(db, "literalDatatypeUri", type);
-//		} 
-//		
-//		return "l#" + prefix + "#" + name;
 	}
 	
 	
@@ -160,6 +161,11 @@ public class ShardedRedisTripleStore {
 			db.hset(key + "_r", alias, noun);
 		}
 		return alias;
+	}
+	
+	private String unshorten(Jedis db, String type, String alias){
+		String key = "alias:" + type + "_r";
+		return db.hget(key, alias);
 	}
 	
 	// keeping this dumb and simple for now.
@@ -189,6 +195,36 @@ public class ShardedRedisTripleStore {
 			result = db.scriptLoad(script);
 		}
 		// TODO Auto-generated method stub
+		return result;
+	}
+	
+	public QueryResult execute(SPARQLRedisVisitor v){
+		// run map phase
+		String luaMapScript = v.luaMapScript();
+		for (Jedis db: shards){
+			db.eval(luaMapScript, 2, "mapResults", "log");
+		}
+		
+		// for each returned graph pattern, union the results from all nodes
+		List<List<String>> rawResults = new ArrayList<List<String>>();
+		// rawResults is indexed by [shard][patternIdx]
+		for (Jedis db: shards){
+			rawResults.add(db.lrange("mapResults", 0, -1));
+		}
+		Stack<QueryResult> patternStack = new Stack<QueryResult>();
+		
+		int patternIdx = rawResults.get(0).size() - 1;
+				
+		while(patternIdx > -1){
+			QueryResult qr = new QueryResult();
+			for(int shardIdx = 0; shardIdx < rawResults.size(); shardIdx++){
+				qr.addPatternFromJSON(rawResults.get(shardIdx).remove(patternIdx));
+			}
+			patternStack.push(qr);
+			patternIdx -= 1;
+		}
+		
+		QueryResult result = v.QueryOP().reduce(patternStack);
 		return result;
 	}
 }

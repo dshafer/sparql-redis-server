@@ -4,6 +4,8 @@
  */
 package translate.sparql;
 
+import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,10 +19,12 @@ import main.DataTypes.GraphResult;
 
 import redis.clients.jedis.Jedis;
 import translate.redis.BGP;
-import translate.redis.Distinct;
-import translate.redis.Filter;
-import translate.redis.Project;
+import translate.redis.MapPhaseDistinct;
+import translate.redis.MapPhaseFilter;
+import translate.redis.MapPhaseLeftJoin;
+import translate.redis.MapPhaseProject;
 import translate.redis.RedisOP;
+import translate.redis.ReducePhaseJoin;
 
 
 import com.hp.hpl.jena.graph.Triple;
@@ -77,44 +81,73 @@ public class SPARQLRedisVisitor implements OpVisitor
 
 	final boolean targetClusterTables = false;
 	
-	int tripleIndex = 0;
-	int bgpIndex = 0;
-	int joinIndex = 0;
-	//Stack<SqlOP> sqlOpStack = new Stack<SqlOP>();
 	Stack<RedisOP> redisOpStack = new Stack<RedisOP>();
 	String baseURI = "";
 	int maxNumOfKeys = 0;
+	ShardedRedisTripleStore ts;
 	
-	public SPARQLRedisVisitor() 
+	public SPARQLRedisVisitor(ShardedRedisTripleStore _ts) 
 	{
-	
+		ts = _ts;
 	}
 	
-	private String _execute(ShardedRedisTripleStore ts, String keyspace, String graphPatternKey){
-		RedisOP op = redisOpStack.pop();
-		if (!redisOpStack.isEmpty()){
-			graphPatternKey = _execute(ts, keyspace, graphPatternKey);
-		}
-		return op.execute(ts, keyspace, graphPatternKey);
+	public RedisOP QueryOP(){
+		return redisOpStack.peek();
 	}
 	
-	public String execute(ShardedRedisTripleStore ts){
-		String keyspace = "redisSparql:";
-		String graphPatternKey = keyspace + "working:graphResult";
-		// make sure the initial graph pattern input is empty
-		for(Jedis j: ts.shards){
-			j.del(graphPatternKey);
-		}
-		if (!redisOpStack.isEmpty()){
-			return _execute(ts, keyspace, graphPatternKey);
-		}
-		return null;
+	/*
+	 * Returns a Lua script that takes two arguments:
+	 * KEYS[1]: Redis key to store the final JSON-ified map result
+	 * KEYS[2]: Redis key for log entries
+	 */
+	public String luaMapScript(){
+		String result = ""
+				+ " \n"
+				+ "local function log(s) \n"
+				+ "  local logKey = KEYS[2] \n"
+				+ "  redis.call('rpush', logKey, s) \n"
+				+ "end \n"
+				+ "\n"
+				+ "local mapResultKey = KEYS[1] \n"
+				+ "local mapResults = {} \n"
+				+ "\n"
+				+ redisOpStack.peek().mapLuaScript()
+				+ "\n"
+				+ "for i,mapResult in ipairs(mapResults) do \n"
+				+ "  redis.call('rpush', mapResultKey, cjson.encode(mapResult)) \n"
+				+ "end  \n"
+				//+ "redis.call('set', mapResultKey, cjson.encode(mapResults)) \n"
+				+ "";
+		
+		return result;
 	}
+	
+//	private String _execute(ShardedRedisTripleStore ts, String keyspace, String graphPatternKey, String logKey){
+//		RedisOP op = redisOpStack.pop();
+//		if (!redisOpStack.isEmpty()){
+//			graphPatternKey = _execute(ts, keyspace, graphPatternKey, logKey);
+//		}
+//		return op.mapLuaScript(ts, keyspace, graphPatternKey, logKey);
+//	}
+//	
+//	public String execute(ShardedRedisTripleStore ts){
+//		String keyspace = "redisSparql:";
+//		String graphPatternKey = keyspace + "working:graphResult";
+//		String logKey = keyspace + "log";
+//		// make sure the initial graph pattern input is empty
+//		for(Jedis j: ts.shards){
+//			j.del(graphPatternKey);
+//		}
+//		if (!redisOpStack.isEmpty()){
+//			return _execute(ts, keyspace, graphPatternKey, logKey);
+//		}
+//		return null;
+//	}
 	
 	public void visit(OpProject arg0) 
 	{
 		System.out.println(">>>> project = " + arg0.getVars());
-		Project pOp = new Project();
+		MapPhaseProject pOp = new MapPhaseProject();
 		for (Var v : arg0.getVars()) 
 		{
 			pOp.projectVariable(v.getName());
@@ -125,41 +158,54 @@ public class SPARQLRedisVisitor implements OpVisitor
 	
 	public void visit(OpBGP bgp) 
 	{
-		System.out.println(">>>> bgp " + bgpIndex + " = " + bgp.getPattern() );
-		BGP redisBGP = new BGP();
+		System.out.println(">>>> bgp = " + bgp.getPattern() );
+		Map<String, BGP> subPatterns = new HashMap<String, BGP>();
 		for (Triple t : bgp.getPattern()) 
 		{
-			try 
-			{
-				redisBGP.addTriple(t);
-				
-			} 
-			catch (Exception e) 
-			{
-				e.printStackTrace();
+			String s = ts.getAlias(t.getSubject());
+			String p = ts.getAlias(t.getPredicate());
+			String o = ts.getAlias(t.getObject());
+			if (subPatterns.get(s) == null){
+				subPatterns.put(s,  new BGP());
+			}
+			subPatterns.get(s).addTriple(s, p, o);
+		}
+		
+		Stack<RedisOP> patternStack = new Stack<RedisOP>();
+		for(BGP b : subPatterns.values()){
+			patternStack.push(b);
+		}
+		
+		RedisOP actualOP = null;
+		if (patternStack.size() == 1){
+			// simple case - don't need to do any reduce-phase joins
+			actualOP = patternStack.pop();
+		} else {
+			actualOP = new ReducePhaseJoin(patternStack.pop(), patternStack.pop());
+			while (!patternStack.isEmpty()){
+				actualOP = new ReducePhaseJoin(actualOP, patternStack.pop());
 			}
 		}
 		
-		this.redisOpStack.push(redisBGP);
+		this.redisOpStack.push(actualOP);
 	}
 	
 	public void visit(OpReduced arg0) 
 	{
 		System.out.println(">>>> reduced");
-		this.redisOpStack.push(new Distinct());
+		throw new UnsupportedOperationException();
 	}
 	
 	public void visit(OpDistinct arg0) 
 	{
 		System.out.println(">>>> distinct");
-		this.redisOpStack.push(new Distinct());
+		throw new UnsupportedOperationException();
 	}
 
 	public void visit(OpFilter arg0) 
 	{
 		System.out.println(">>>> filter = " + arg0.getExprs());
-		//Map<String, SqlExpr> aggregatorMap = sqlOpStack.peek().getAggregatorMap();
-		Filter f = new Filter();
+		MapPhaseFilter f = new MapPhaseFilter(redisOpStack.peek());
 		for(Expr e: arg0.getExprs()) 
 		{
 			System.out.println(">>>>>> expr = " + e);
@@ -170,7 +216,7 @@ public class SPARQLRedisVisitor implements OpVisitor
 
 	public void visit(OpJoin arg0) 
 	{
-		System.out.println(">>>> join " + joinIndex + " = " + arg0 );
+		System.out.println(">>>> join = " + arg0 );
 //		SqlOP rhs = sqlOpStack.pop();
 //		SqlOP lhs = sqlOpStack.pop();
 //		sqlOpStack.push(new JOIN(++joinIndex, lhs, rhs));
@@ -178,7 +224,9 @@ public class SPARQLRedisVisitor implements OpVisitor
 	
 	public void visit(OpLeftJoin arg0) 
 	{
-		System.out.println(">>>> leftjoin " + joinIndex + " = " + arg0 );
+		System.out.println(">>>> leftjoin = " + arg0 );
+		MapPhaseLeftJoin lj = new MapPhaseLeftJoin();
+		redisOpStack.push(lj);
 		// Filters passed to the left join constructor are included
 		// in the 'ON' clause of the left-join operator.
 		// Filters added using the Query.addFilter method are added 
@@ -187,7 +235,8 @@ public class SPARQLRedisVisitor implements OpVisitor
 		
 		if (arg0.getExprs() != null) 
 		{
-			this.visit((OpFilter)OpFilter.filter(arg0.getExprs(), null));
+			throw new UnsupportedOperationException("Left Join Filters Not Yet Implemented");
+//			this.visit((OpFilter)OpFilter.filter(arg0.getExprs(), null));
 			
 //			for(Expr e: arg0.getExprs()) 
 //			{

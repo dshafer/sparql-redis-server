@@ -1,6 +1,7 @@
 package translate.redis;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import main.ShardedRedisTripleStore;
 import main.DataTypes.GraphResult;
@@ -13,31 +14,32 @@ import translate.redis.RedisOP;
 import org.json.*;
 
 public class BGP implements RedisOP {
-	List<Triple> triples;
-	String bgpMatchScript;
-	String tripleKey;
-	String resultKey;
-	List<String> projectedVariables;
+	StringBuilder luaTripleStringBuilder;
+	String luaTripleDelimiter;
 	
 	public BGP() {
-		triples = new ArrayList<Triple>();
+		luaTripleStringBuilder = new StringBuilder();
+		luaTripleDelimiter = "";
+	}
+	
+	public void cleanup(){
+	
+	}
+	
+	public void addTriple(String s, String p, String o){
+		String luaTriple = "{'" + s + "'," + "'" + p + "'," + "'" + o + "'}";
+		luaTripleStringBuilder.append(luaTripleDelimiter + luaTriple);
+		luaTripleDelimiter = ",";
+	}
+
+	@Override
+	public String mapLuaScript() {
 		
-		// bgp match script takes three args
-		// Key1: Redis key containing list of triple patterns to match
-		// Key2: Redis key containing Graph Pattern Data Input.
-		// Key3: Redis key to store Graph Pattern Data Output
-		// Returns: 1 if the entire BGP was processed.
-		//          0 if entire BGP could not be processed.  Caller should UNION results with other nodes and call bgpMatchScript again
-		
-		
-		bgpMatchScript = ""
-				+ "  \n"
-				+ "local tripleListKey = KEYS[1] \n"
-				+ "local graphPatternKey = KEYS[2] \n"
-				+ "local logKey = KEYS[3] \n"
+		String result = ""
+				+ "log('map -> BGP') \n"
+				+ "local tripleList = { " + luaTripleStringBuilder.toString() + " } \n"
 				+ "\n"
 				+ "local function hashJoin(left, right, joinCols) \n"
-				+ "  local logKey = KEYS[3] \n"
 				+ "  local joinTable = {} \n"
 				+ "  local resultTable = {} \n"
 				+ "  local joinSig = '' \n"
@@ -73,10 +75,8 @@ public class BGP implements RedisOP {
 				+ "      for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
 				+ "        table.insert(outputRow, rval[rKeepIndex]) \n"
 				+ "      end \n"
-				+ "      redis.call('rpush', logKey, 'match:' .. cjson.encode(outputRow))"
 				+ "      table.insert(resultTable, outputRow) \n"
 				+ "    end \n"
-				+ "    "
 				+ "  end \n"
 				+ "  return resultTable \n"
 				+ "end \n"
@@ -93,7 +93,6 @@ public class BGP implements RedisOP {
 				+ "  end \n"
 				+ "  return hashJoin(left,right,joinCols) \n"
 				+ "end \n"
-				+ "\n"
 				+ "local function split(pString, pPattern) \n"
 				+ "  local Table = {}  -- NOTE: use {n = 0} in Lua-5.0 \n"
 				+ "  local fpat = '(.-)' .. pPattern \n"
@@ -113,42 +112,17 @@ public class BGP implements RedisOP {
 				+ "  return Table \n"
 				+ "end \n"
 				+ "\n"
-				+ "local function getLiteralAlias(l) \n"
-				+ "  if redis.call('hexists', 'literalAliases', l) == 1 then \n"
-				+ "    return redis.call('hget', 'literalAliases', l) \n"
-				+ "  end \n"
-				+ "  local lAlias = '#' .. redis.call('hlen', 'literalAliases') \n"
-				+ "  redis.call('hset', 'literalAliases', l, lAlias) \n"
-				+ "  redis.call('hset', 'literalLookup', lAlias, l) \n"
-				+ "  return lAlias \n"
-				+ "end \n"
 				+ "local function getLiteralFromAlias(alias) \n"
 				+ "  return '!' .. redis.call('hget', 'literalLookup', alias) \n"
-				+ "  -- return 'blah' -- alias \n"
 				+ "end \n"
 				+ "\n"
 				+ "local searchFuncs = {} \n"
 				+ "local alteredVars = {} \n"
 				+ "local tripleTables = {} \n"
-				+ "-- if there's an input graph pattern, it becomes the initial tripleResult \n"
-				+ "local inputGraphPatternJson = redis.call('get', graphPatternKey) \n"
-				+ "if inputGraphPatternJson then \n"
-				+ "  table.insert(tripleTables, cjson.decode(inputGraphPatternJson)) \n"
-				+ "end \n"
-				+ "-- if redis.call('llen', graphPatternKey) > 0 then \n"
-				+ "--   local inputTable = {} \n"
-				+ "--   while redis.call('llen', graphPatternKey) > 0 do \n"
-				+ "--     table.insert(inputTable, cjson.decode(redis.call('lpop', graphPatternKey))) \n"
-				+ "--   end \n"
-				+ "--   table.insert(tripleTables, inputTable) \n"
-				+ "-- end \n"
+				+ "local thisMapResult = {} \n"
 				+ "local searchCtrl = {'S', 'P', 'O'} \n"
-				+ "while redis.call('llen', tripleListKey) > 0 do \n"
-				+ "  local triplePatternJson = redis.call('lpop', tripleListKey) \n"
-				+ "  redis.call('rpush', logKey, 'Processing Triple pattern' .. triplePatternJson) \n"
-				+ "  local triplePattern = cjson.decode(triplePatternJson) \n"
+				+ "for ti, triplePattern in ipairs(tripleList) do \n"
 				+ "  -- triplePattern is an array of [s, p, o] \n"
-				+ "  \n"
 				+ "  local searchType = '' \n"
 				+ "  local searchKey = '' \n"
 				+ "  local outputVarList = {} \n"
@@ -163,7 +137,7 @@ public class BGP implements RedisOP {
 				+ "  end \n"
 				+ "  table.insert(patternResult, outputVarList) \n"
 				+ "  searchKey = searchType .. searchKey \n"
-				+ "  redis.call('rpush', logKey, 'searchKey is ' .. searchKey) \n"
+				+ "  log('searchKey is ' .. searchKey) \n"
 				+ "  local patternMembers = redis.call('smembers', searchKey) \n"
 				+ "  for i,pattern in ipairs(patternMembers) do \n"
 				+ "    table.insert(patternResult, split(pattern, ':')) \n"
@@ -172,76 +146,44 @@ public class BGP implements RedisOP {
 				+ "end \n"
 				+ " \n"
 				+ "-- do the joins over the various BGP triples \n"
-				+ "local result = table.remove(tripleTables, 1) \n"
+				+ "thisMapResult = table.remove(tripleTables, 1) \n"
 				+ "local joinCount = 0 \n"
-				//+ "redis.call('rpush', logKey, joinCount .. ' Joins: result is ' .. cjson.encode(result)) \n"
 				+ "local extra = table.remove(tripleTables, 1) \n"
 				+ "while extra do \n"
-				+ "  result = naturalJoin(result, extra) \n"
+				+ "  thisMapResult = naturalJoin(thisMapResult, extra) \n"
 				+ "  joinCount = joinCount + 1 \n"
-				//+ "  redis.call('rpush', logKey, joinCount .. ' Joins: result is ' .. cjson.encode(result)) \n"
 				+ "  extra = table.remove(tripleTables, 1) \n"
 				+ "end \n"
 				+ " \n"
-				+ "redis.call('rpush', logKey, joinCount .. ' After Joins: result is ' .. cjson.encode(result)) \n"
+				+ "log('After Joins: thisMapResult is ' .. cjson.encode(thisMapResult)) \n"
 				+ "-- translate the literals \n"
-				+ "for i,row in ipairs(result) do \n"
-				//+ "  redis.call('rpush', logKey, 'projecting all vars') \n"
+				+ "for i,row in ipairs(thisMapResult) do \n"
 				+ "  for j,val in ipairs(row) do \n"
 				+ "    if string.find(val, '^#') then \n"
 				+ "      row[j] = getLiteralFromAlias(val) \n"
 				+ "    end \n"
 				+ "  end \n"
-				+ "  result[i] = row \n"
+				+ "  thisMapResult[i] = row \n"
 				+ "end \n"
 				+ " \n"
-				+ "-- put the jsonified result table into inputGraphPatternKey \n"
-				+ "redis.call('rpush', logKey, 'Final (translated) result is ' .. cjson.encode(result)) \n"
-				+ "redis.call('rpush', graphPatternKey, cjson.encode(result)) \n"
-				+ "-- we're done \n"
-				+ "return 1 \n"
+				+ "table.insert(mapResults, thisMapResult) \n"
+				+ "log('Final (translated) BGP result is ' .. cjson.encode(thisMapResult)) \n"
+				+ "\n"
 				+ "";
 		
-	}
-	
-	public void cleanup(){
-	
-	}
-	
-	
-	public void addTriple(Triple t){
-		triples.add(t);
+		return result;
+
+		
 	}
 
 	@Override
-	public String execute(ShardedRedisTripleStore ts, String keyspace, String graphPatternKey) {
-		String bgpMatchScriptHandle = ts.loadScript(bgpMatchScript);
-		
-		String tripleKey = keyspace + "bgp:working:triples";
-		String logKey = keyspace + "bgp:log";
-		// put json-encoded triples into first key
-		for(Triple t: triples){
-			JSONArray ja = new JSONArray();
-			ja.put(ts.getAlias(t.getSubject()));
-			ja.put(ts.getAlias(t.getPredicate()));
-			ja.put(ts.getAlias(t.getObject()));
-			String json = ja.toString();
-			for(Jedis j: ts.shards){
-				j.rpush(tripleKey, json);
-			}
-		}
-		
-		
-		
-		
-		ArrayList<Object> results = new ArrayList<Object>();
-		for(Jedis j: ts.shards){
-			results.add(j.evalsha(bgpMatchScriptHandle, 3, tripleKey, graphPatternKey, logKey));
-		}
-		
-		return graphPatternKey;
-		
+	public QueryResult reduce(Stack<QueryResult> patternStack) {
+		return patternStack.pop();
 	}
 
+	@Override
+	public Boolean completeAfterMapPhase() {
+		return true;
+	}
 
 }

@@ -1,8 +1,11 @@
 package translate.redis;
 
+import java.util.Stack;
+
 import main.ShardedRedisTripleStore;
-import main.DataTypes.GraphResult;
 
 public interface RedisOP {
-	public String execute(ShardedRedisTripleStore ts, String keyspace, String graphPatternKey);
+	public String mapLuaScript();
+	public QueryResult reduce(Stack<QueryResult> patternStack);
+	public Boolean completeAfterMapPhase();
 }
