@@ -1,20 +1,27 @@
 package main;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Stack;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.Pipeline;
 import translate.redis.QueryResult;
 import translate.sparql.SPARQLRedisVisitor;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
 
 import main.DataTypes.GraphResult;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.graph.Triple;
 
 public class ShardedRedisTripleStore {
@@ -54,18 +61,24 @@ public class ShardedRedisTripleStore {
 				+ "local objectAliasOrLiteral = ARGV[3] \n"
 				+ "local objectIsLiteral = ARGV[4] \n"
 				+ "local objectAlias = (objectIsLiteral == '1') and getLiteralAlias(objectAliasOrLiteral) or objectAliasOrLiteral \n"
-				+ "local Spo = 'S:' .. subjectAlias \n"
-				+ "local sPo = 'P:' .. predicateAlias \n"
-				+ "local spO = 'O:' .. objectAlias \n"
-				+ "local SPo = 'SP:' .. subjectAlias .. ':' .. predicateAlias \n"
-				+ "local SpO = 'SO:' .. subjectAlias .. ':' .. objectAlias \n"
-				+ "local sPO = 'PO:' .. predicateAlias .. ':' .. objectAlias \n"
-				+ "redis.call('sadd', Spo, predicateAlias .. ':' .. objectAlias) \n"
-				+ "redis.call('sadd', sPo, subjectAlias .. ':' .. objectAlias) \n"
-				+ "redis.call('sadd', spO, subjectAlias .. ':' .. predicateAlias) \n"
-				+ "redis.call('sadd', SPo, objectAlias) \n"
-				+ "redis.call('sadd', SpO, predicateAlias) \n"
-				+ "redis.call('sadd', sPO, subjectAlias) \n"
+				+ "local encodedValue = subjectAlias .. ':' .. predicateAlias .. ':' .. objectAlias \n"
+				+ "redis.call('sadd', 'S:' .. subjectAlias, encodedValue) \n"
+				+ "redis.call('sadd', 'P:' .. predicateAlias, encodedValue) \n"
+				+ "redis.call('sadd', 'O:' .. objectAlias, encodedValue) \n"
+				//+ "redis.call('rpush', 'log', 'added to O:' .. objectAlias .. ' -> ' .. encodedValue) \n"
+				
+//				+ "local Spo = 'S:' .. subjectAlias \n"
+//				+ "local sPo = 'P:' .. predicateAlias \n"
+//				+ "local spO = 'O:' .. objectAlias \n"
+//				+ "local SPo = 'SP:' .. subjectAlias .. ':' .. predicateAlias \n"
+//				+ "local SpO = 'SO:' .. subjectAlias .. ':' .. objectAlias \n"
+//				+ "local sPO = 'PO:' .. predicateAlias .. ':' .. objectAlias \n"
+//				+ "redis.call('sadd', Spo, predicateAlias .. ':' .. objectAlias) \n"
+//				+ "redis.call('sadd', sPo, subjectAlias .. ':' .. objectAlias) \n"
+//				+ "redis.call('sadd', spO, subjectAlias .. ':' .. predicateAlias) \n"
+//				+ "redis.call('sadd', SPo, objectAlias) \n"
+//				+ "redis.call('sadd', SpO, predicateAlias) \n"
+//				+ "redis.call('sadd', sPO, subjectAlias) \n"
 				+ "";
 		
 		for(Jedis db: shards){
@@ -77,6 +90,58 @@ public class ShardedRedisTripleStore {
 		aliasDb.flushDB();
 		for(Jedis db:shards){
 			db.flushDB();
+		}
+	}
+	
+	public void loadFromFile(String filename){
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(filename));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String line;
+		int tripleCount = 0;
+		try {
+			while ((line = br.readLine()) != null) {
+				tripleCount++;
+				int firstSpace = line.indexOf(' ');
+				int secondSpace = line.indexOf(' ', firstSpace + 1);
+				int eol = line.indexOf(" .", secondSpace + 1);
+				String s = line.substring(1,  firstSpace-1);
+				String p = line.substring(firstSpace + 2, secondSpace -1);
+				String o = line.substring(secondSpace + 1, eol);
+				Node sN = Node.createURI(s);
+				Node pN = Node.createURI(p);
+				Node oN = null;
+				if(o.startsWith("\"")){
+					if(o.contains("\"^^")){
+						int sep = o.indexOf("\"^^");
+						String oV = o.substring(1, sep);
+						oN = Node.createLiteral(oV);
+					} else {
+						if(o.startsWith("\"") && !o.endsWith("\"")){  // for text literals that specify language
+							oN = Node.createLiteral(o);
+						} else {
+							oN = Node.createLiteral(o.substring(1, o.length()-1));
+						}
+					}
+				} else {
+					oN = Node.createURI(o.substring(1, o.length()-1));
+				}
+				insertTriple(sN, pN, oN);
+			   // process the line.
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			br.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -93,19 +158,25 @@ public class ShardedRedisTripleStore {
 		String sP = getAlias(p);
 		String sO = getAlias(o);
 		
+		if(o.toString().contains("ProductType66")){
+			int x = 0;
+			int y = x + 1;
+		}
+		
 		db.evalsha(insertTripleHandle, 0, sA, sP, sO, o.isLiteral() ? "1" : "0");
 		
-//		// set the value for forward-lookup (lookup-by-subject)
-//		db.rpush("f:" + sP + ":" + sA, sO);
-//		if (!o.isLiteral()){
-//			// set the value for the reverse-lookup (lookup-by-predicate)
-//			db.rpush("r:" + sP + ":" + sO, sA);
-//		}
+		if(o.isURI()){
+			db = shards.get(calcShardIdx(o.toString(true)));
+			db.evalsha(insertTripleHandle, 0, sA, sP, sO, "0");
+		}
+		
 	}
 	
 	
 	public String getStringFromAlias(String alias){
-		if(alias.startsWith("!")){
+		if((alias == null) || alias.startsWith("@")){
+			return null;
+		} else if(alias.startsWith("!")){
 			// this is a literal.  just strip the "!" and return
 			return alias.substring(1);
 		} else {
@@ -121,8 +192,8 @@ public class ShardedRedisTripleStore {
 		} else if (n.isLiteral()) {
 			return getLiteralAlias(db, n);
 		} else {
+
 			return n.toString();
-			//return shorten(db, "node", n.toString(true));
 		}
 	}
 	private String calcAlias(long idx){
@@ -147,7 +218,6 @@ public class ShardedRedisTripleStore {
 	}
 	
 	private String getLiteralAlias(Jedis db, Node n){
-		
 		return n.getLiteralValue().toString();
 	}
 	
@@ -198,12 +268,42 @@ public class ShardedRedisTripleStore {
 		return result;
 	}
 	
-	public QueryResult execute(SPARQLRedisVisitor v){
-		// run map phase
-		String luaMapScript = v.luaMapScript();
-		for (Jedis db: shards){
-			db.eval(luaMapScript, 2, "mapResults", "log");
+	private class JedisRunnable implements Runnable {
+
+		final Jedis db;
+		final String luaScript;
+		public JedisRunnable(Jedis _db, String _luaScript){
+			db = _db;
+			luaScript = _luaScript;
 		}
+		@Override
+		public void run() {
+			db.del("log");
+			db.del("mapResults");
+			db.eval(luaScript, 2, "mapResults", "log");
+		}
+		
+	}
+	
+	public QueryResult execute(SPARQLRedisVisitor v){
+
+		// run map phase
+		String luaMapScript = this.luaScriptBoilerplate() + v.luaMapScript();
+		List<Thread> thrs = new ArrayList<Thread>();
+		for (Jedis db: shards){
+			JedisRunnable jr = new JedisRunnable(db, luaMapScript);
+			Thread th = new Thread(jr);
+			th.start();
+			thrs.add(th);
+		}
+		for (Thread th : thrs){
+			try {
+				th.join();
+			} catch (InterruptedException e) {
+				return null;
+			}
+		}
+		
 		
 		// for each returned graph pattern, union the results from all nodes
 		List<List<String>> rawResults = new ArrayList<List<String>>();
@@ -213,18 +313,240 @@ public class ShardedRedisTripleStore {
 		}
 		Stack<QueryResult> patternStack = new Stack<QueryResult>();
 		
-		int patternIdx = rawResults.get(0).size() - 1;
-				
-		while(patternIdx > -1){
-			QueryResult qr = new QueryResult();
+		int patternIdx = 0;//rawResults.get(0).size() - 1;
+		
+		while(patternIdx < rawResults.get(0).size()){
+			List<QueryResult> pieces = new ArrayList<QueryResult>();
 			for(int shardIdx = 0; shardIdx < rawResults.size(); shardIdx++){
-				qr.addPatternFromJSON(rawResults.get(shardIdx).remove(patternIdx));
+				QueryResult qr = new QueryResult();
+				qr.addPatternFromJSON(rawResults.get(shardIdx).get(patternIdx));
+				pieces.add(qr);
 			}
-			patternStack.push(qr);
-			patternIdx -= 1;
+			QueryResult merged = merge(pieces);
+			patternStack.push(merged);
+			patternIdx += 1;
 		}
 		
 		QueryResult result = v.QueryOP().reduce(patternStack);
 		return result;
+	}
+	
+	private QueryResult merge(List<QueryResult> pieces){
+		List<String> columnNames = pieces.get(0).columnNames;
+		int sortIdx = -1;
+		Boolean sortAsc = true;
+		for(int x=0; x < columnNames.size(); x++){
+			if(columnNames.get(x).equals("META_SORT_ASC")){
+				sortIdx = x;
+				sortAsc = true;
+			} else if (columnNames.get(x).equals("META_SORT_DESC")){
+				sortIdx = x;
+				sortAsc = false;
+			}
+		}
+		QueryResult result = new QueryResult(pieces.get(0).columnNames);
+		
+		if(sortIdx == -1){
+			for(int x = 1; x < pieces.size(); x++){
+				pieces.get(0).append(pieces.get(x));
+			}
+			return pieces.get(0);
+		}
+		
+		int[] rowPtrs = new int[pieces.size()];
+		for(int x=0; x < pieces.size(); x++){
+			rowPtrs[x] = 0;
+		}
+		Boolean rowsRemaining = false;
+		for(int x=0; x < pieces.size(); x++){
+			rowsRemaining |= pieces.get(x).rows.size() > 0;
+		}
+		int rowCount = 0;
+		while(rowsRemaining){
+			rowCount++;
+			// find next candidate;
+			String val = null; //pieces.get(0).rows.get(rowPtrs[0]).get(sortIdx);
+			int nextPiece = -1;
+			for(int x=0; x < pieces.size(); x++){
+				if(rowPtrs[x] < pieces.get(x).rows.size()){
+					String testVal = pieces.get(x).rows.get(rowPtrs[x]).get(sortIdx);
+					if((val == null) || (sortAsc && (testVal.compareTo(val) < 0)) || (!sortAsc && (testVal.compareTo(val) > 0))){
+						nextPiece = x;
+						val = testVal;
+					}
+				}
+			}
+			
+			result.addRow(pieces.get(nextPiece).rows.get(rowPtrs[nextPiece]));
+			rowPtrs[nextPiece]++;
+			
+			rowsRemaining = false;
+			for(int x=0; x < pieces.size(); x++){
+				rowsRemaining |= (rowPtrs[x]+1) < pieces.get(x).rows.size();
+			}
+		}
+		
+		
+		
+		return result;
+		
+	}
+	
+	private String luaScriptBoilerplate(){
+	  StringBuilder sb = new StringBuilder();
+	  sb.append(""
+//				  "local function hashJoin(left, right, joinCols) \n"
+//				+ "  local joinTable = {} \n"
+//				+ "  local resultTable = {} \n"
+//				+ "  local joinSig = '' \n"
+//				+ "  local rightJoinCols = {} \n"
+//				+ "  for i, joinCol in ipairs(joinCols) do \n"
+//				+ "    rightJoinCols[joinCol[3]] = true \n"
+//				+ "  end \n"
+//				+ "  local rightKeepCols = {} \n"
+//				+ "  for ri,rColName in ipairs(right[1]) do \n"
+//				+ "    if not rightJoinCols[ri] then \n"
+//				+ "      table.insert(rightKeepCols, ri) \n"
+//				+ "    end \n"
+//				+ "  end \n"
+//				+ "  -- compute a table with the hash of the join keys from the left table \n"
+//				+ "  for l, lval in ipairs(left) do \n"
+//				+ "    joinSig = '' \n"
+//				+ "    for i, joinCol in ipairs(joinCols) do \n"
+//				+ "      joinSig = joinSig .. lval[joinCol[2]] \n"
+//				+ "    end \n"
+////				+ "    log('joinSig/lval is ' .. joinSig .. '/' .. cjson.encode(lval)) \n"
+//				+ "    joinTable[joinSig] = lval \n"
+//				+ "  end \n"
+//				+ "  for r, rval in ipairs(right) do \n"
+//				+ "    joinSig = '' \n"
+//				+ "    for i, joinCol in ipairs(joinCols) do \n"
+//				+ "      joinSig = joinSig .. rval[joinCol[3]] \n"
+//				+ "    end \n"
+//				+ "    if joinTable[joinSig] then \n"
+//				+ "      -- found a good row.  Need to join it together and append the result \n"
+//				+ "      local outputRow = {} \n"
+//				+ "      for li,lItem in ipairs(joinTable[joinSig]) do \n"
+//				+ "        table.insert(outputRow, lItem) \n"
+//				+ "      end \n"
+//				+ "      for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
+//				+ "        table.insert(outputRow, rval[rKeepIndex]) \n"
+//				+ "      end \n"
+//				+ "      table.insert(resultTable, outputRow) \n"
+//				+ "    end \n"
+//				+ "  end \n"
+//				+ "  return resultTable \n"
+//				+ "end \n"
+				
+ 
+				
+				+ "local function hashJoin(left, right, joinCols, isLeftJoin) \n"
+				+ "  local joinTable = {} \n"
+				+ "  local resultTable = {} \n"
+				+ "  local joinSig = '' \n"
+				+ "  local rightJoinCols = {} \n"
+				+ "  for i, joinCol in ipairs(joinCols) do \n"
+				+ "    rightJoinCols[joinCol[3]] = true \n"
+				+ "  end \n"
+				+ "  local rightKeepCols = {} \n"
+				+ "  for ri,rColName in ipairs(right[1]) do \n"
+				+ "    if not rightJoinCols[ri] then \n"
+				+ "      table.insert(rightKeepCols, ri) \n"
+				+ "    end \n"
+				+ "  end \n"
+				+ "  -- compute a table with the hash of the join keys from the right table \n"
+				+ "  for ri, rval in ipairs(right) do \n"
+				+ "    joinSig = '' \n"
+				+ "    for i, joinCol in ipairs(joinCols) do \n"
+				+ "      joinSig = joinSig .. rval[joinCol[3]] \n"
+				+ "    end \n"
+				+ "    if not joinTable[joinSig] then \n"
+				+ "      joinTable[joinSig] = {} \n"
+				+ "    end \n"
+				+ "    table.insert(joinTable[joinSig], rval) \n"
+				+ "  end \n"
+				+ "  for li, lval in ipairs(left) do \n"
+				+ "    joinSig = '' \n"
+				+ "    for i, joinCol in ipairs(joinCols) do \n"
+				+ "      joinSig = joinSig .. lval[joinCol[2]] \n"
+				+ "    end \n"
+				+ "    local outputRow = lval \n"
+				+ "    if joinTable[joinSig] then \n"
+				+ "      -- has a counterpart in right.  Append the values \n"
+				+ "      for i, rval in ipairs(joinTable[joinSig]) do \n"
+				+ "        for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
+				+ "          table.insert(outputRow, rval[rKeepIndex]) \n"
+				+ "        end \n"
+				+ "        table.insert(resultTable, outputRow) \n"
+				+ "      end \n"
+				+ "    elseif isLeftJoin then \n"
+				+ "      -- no counterpart in right.  Append 'null' values encoded as'@' \n"
+				+ "      for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
+				+ "        table.insert(outputRow, '@') \n"
+				+ "      end \n"
+				+ "      table.insert(resultTable, outputRow) \n"
+				+ "    end \n"
+				+ "  end \n"
+				+ "  return resultTable \n"
+				+ "end \n"
+				+ " \n"
+				
+				+ "local function naturalJoin(left, right) \n"
+				+ "  -- determine join columns\n"
+				+ "  local joinCols = {} \n"
+				+ "  for l,lColName in ipairs(left[1]) do \n"
+				+ "    for r,rColName in ipairs(right[1]) do \n"
+				+ "      if (not (lColName == '*')) and (lColName == rColName) then \n"
+				+ "        table.insert(joinCols, {lColName, l, r}) \n"
+				+ "        break \n"
+				+ "      end \n"
+				+ "    end \n"
+				+ "  end \n"
+//				+ "  log('joining on cols: ' .. cjson.encode(joinCols)) \n"
+				+ "  local result =  hashJoin(left,right,joinCols, false) \n"
+				+ "  -- log('join result is ' .. cjson.encode(result)) \n"
+				+ "  -- log('join result has ' .. (#result - 1) .. ' rows') \n"
+				+ "  return result \n"
+				+ "end \n" 
+				
+				+ "local function naturalLeftJoin(left, right) \n"
+				+ "  -- determine join columns\n"
+				+ "  local joinCols = {} \n"
+				+ "  for l,lColName in ipairs(left[1]) do \n"
+				+ "    for r,rColName in ipairs(right[1]) do \n"
+				+ "      if lColName == rColName then \n"
+				+ "        table.insert(joinCols, {lColName, l, r}) \n"
+				+ "        break \n"
+				+ "      end \n"
+				+ "    end \n"
+				+ "  end \n"
+				+ "  return hashJoin(left,right,joinCols, true) \n"
+				+ "end \n"
+				
+				+ "local function split(pString, pPattern) \n"
+				+ "  local Table = {}  -- NOTE: use {n = 0} in Lua-5.0 \n"
+				+ "  local fpat = '(.-)' .. pPattern \n"
+				+ "  local last_end = 1 \n"
+				+ "  local s, e, cap = pString:find(fpat, 1) \n"
+				+ "  while s do \n"
+				+ "    if s ~= 1 or cap ~= '' then \n"
+				+ "      table.insert(Table,cap) \n"
+				+ "    end \n"
+				+ "    last_end = e+1 \n"
+				+ "    s, e, cap = pString:find(fpat, last_end) \n"
+				+ "  end \n"
+				+ "  if last_end <= #pString then \n"
+				+ "    cap = pString:sub(last_end) \n"
+				+ "    table.insert(Table, cap) \n"
+				+ "  end \n"
+				+ "  return Table \n"
+				+ "end \n"
+				
+				+ "local function getLiteralFromAlias(alias) \n"
+				+ "  return '!' .. redis.call('hget', 'literalLookup', alias) \n"
+				+ "end \n"
+				
+			  );
+	  return sb.toString();
 	}
 }

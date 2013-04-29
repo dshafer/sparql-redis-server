@@ -2,6 +2,7 @@ package translate.redis;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import org.json.JSONArray;
@@ -9,95 +10,89 @@ import org.json.JSONArray;
 import redis.clients.jedis.Jedis;
 
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.expr.Expr;
 
 import main.ShardedRedisTripleStore;
 
-public class MapPhaseProject implements RedisOP {
-	List<String> projectedVariables;
+public class MapPhaseProject extends RedisProjectOP {
 	String projectScript;
 	
-	public MapPhaseProject(){
-		projectedVariables = new ArrayList<String>();
-		projectScript = ""
-				+ "  \n"
-				+ "local graphPatternKey = KEYS[1] \n"
-				+ "local projectedVarsKey = KEYS[2] \n"
-				+ "local logKey = KEYS[3] \n"
-				+ "local projectedVarNames = cjson.decode(redis.call('get', projectedVarsKey)) \n"
-				+ "\n"
-				+ "local graphPatternLen = redis.call('llen', graphPatternKey) \n"
-				+ "for graphIdx = 0, graphPatternLen - 1, 1 do \n"
-				+ "  local result = cjson.decode(redis.call('lindex', graphPatternKey, graphIdx)) \n"
-				+ "  -- figure out variable projection \n"
-				+ "  local projectAllVars = false \n" 
-				+ "  local projectedVarIndexes = {} \n"
-				+ "  if projectedVarNames[1] == '*' then \n"
-				+ "    projectAllVars = true \n"
-				+ "  else \n"
-				+ "    for i,projectedVarName in ipairs(projectedVarNames) do \n"
-				+ "      for j,outputVarName in ipairs(result[1]) do \n"
-				+ "        if outputVarName == projectedVarName then \n"
-				+ "          table.insert(projectedVarIndexes, j) \n"
-				+ "        end \n"
-				+ "      end \n"
-				+ "    end \n"
-				+ "  end \n"
-				+ "  -- do the projection \n"
-				+ "  for i,row in ipairs(result) do \n"
-				+ "    if projectAllVars then \n"
-				+ "      -- no-op \n"
-				+ "    else \n"
-				+ "      local newRow = {} \n"
-				+ "      for i,projectedIdx in ipairs(projectedVarIndexes) do \n"
-				+ "        table.insert(newRow, row[projectedIdx]) \n"
-				+ "      end \n"
-				+ "      result[i] = newRow \n"
-				+ "    end \n"
-				+ "  end \n"
-				+ "   \n"
-				+ "  -- put the jsonified result table into graphPatternKey \n"
-				+ "  redis.call('lset', graphPatternKey, graphIdx, cjson.encode(result)) \n"
-				+ "end \n"
-				+ "-- we're done \n"
-				+ "return 1 \n"
-				+ "";
-		
+	public MapPhaseProject(RedisOP _parent){
+		super(_parent);
 	}
 	@Override
 	public String mapLuaScript() {
-		throw new UnsupportedOperationException();
-//		String projectScriptHandle = ts.loadScript(projectScript);
-//		
-//		String projectedVarsKey = keyspace + "bgp:working:projectedVars";
-//		// put projected variables into second key
-//		
-//		for(Jedis j: ts.shards){
-//			j.set(projectedVarsKey, new JSONArray(projectedVariables).toString());
-//		}
-//		
-//		
-//		
-//		ArrayList<Object> results = new ArrayList<Object>();
-//		for(Jedis j: ts.shards){
-//			results.add(j.evalsha(projectScriptHandle, 3, graphPatternKey, projectedVarsKey, logKey));
-//		}
-//		
-//		return graphPatternKey;
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		String delimiter = "";
+		for (String projectedVar : projectedVariables){
+			sb.append(delimiter);
+			sb.append("'" + projectedVar + "'");
+			delimiter = ",";
+		}
+		sb.append("}");
+		String result = ""
+				+ parent.mapLuaScript()
+				+ "  \n"
+				+ "log(\"MapPhaseProject: " + sb.toString() + "\") \n"
+				+ "local projectedVarNames = " + sb.toString() + " \n"
+				+ "\n"
+				+ "for i, graphPattern in ipairs(mapResults) do \n"
+				+ "  -- figure out variable projection \n"
+				+ "  local projectedVarIndexes = {} \n"
+				+ "  for i,projectedVarName in ipairs(projectedVarNames) do \n"
+				+ "    for j,outputVarName in ipairs(graphPattern[1]) do \n"
+				+ "      if outputVarName == projectedVarName then \n"
+				+ "        table.insert(projectedVarIndexes, j) \n"
+				+ "      end \n"
+				+ "    end \n"
+				+ "  end \n"
+				+ "  for j,outputVarName in ipairs(graphPattern[1]) do \n"
+				+ "    log('considering ' .. outputVarName) \n"
+				+ "    if string.find(outputVarName, '^META_') then \n"
+				+ "      table.insert(projectedVarIndexes, j) \n"
+				+ "    end \n"
+				+ "  end \n"
+				+ "  -- do the projection \n"
+				+ "  local newGraphPattern = {} \n"
+				+ "  for i,row in ipairs(graphPattern) do \n"
+				+ "    local newRow = {} \n"
+				+ "    for i,projectedIdx in ipairs(projectedVarIndexes) do \n"
+				+ "      table.insert(newRow, row[projectedIdx]) \n"
+				+ "    end \n"
+				+ "    table.insert(newGraphPattern, newRow) \n"
+				+ "  end \n"
+				+ "   \n"
+				+ "  -- put the jsonified result table into graphPatternKey \n"
+				+ "  mapResults[i] = newGraphPattern \n"
+				+ "end \n"
+				+ "";
+		return result;
 	}
 
-	public void projectVariable(String name) {
-		projectedVariables.add('?' + name);
-		
-	}
+
 	@Override
-	public QueryResult reduce(Stack<QueryResult> input) {
-		// TODO Auto-generated method stub
-		return null;
+	public QueryResult reduce(Stack<QueryResult> patternStack) {
+		return parent.reduce(patternStack);
 	}
+	
 	@Override
 	public Boolean completeAfterMapPhase() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
+	@Override
+	public String toString(String indent) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("MapPhaseProject {\n");
+		sb.append(indent + "  projectVars: {");
+		String delimiter = "";
+		for(String projectedVariable: projectedVariables){
+			sb.append(delimiter + "'" + projectedVariable + "'");
+			delimiter = ",";
+		}
+		sb.append("}\n");
+		sb.append(indent + "  parent : " + parent.toString(indent + "  "));
+		return sb.toString();
+	}
 }

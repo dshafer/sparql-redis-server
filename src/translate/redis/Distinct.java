@@ -1,8 +1,14 @@
 package translate.redis;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 
 import org.json.JSONArray;
+
+import com.hp.hpl.jena.sparql.expr.Expr;
 
 import redis.clients.jedis.Jedis;
 import main.ShardedRedisTripleStore;
@@ -10,16 +16,22 @@ import main.ShardedRedisTripleStore;
 public class Distinct implements RedisOP {
 
 	String distinctScript;
+	RedisOP parent;
 	
-	public Distinct(){
-		distinctScript = ""
+	public Distinct(RedisOP _parent){
+		this.parent = _parent;
+	}
+
+
+	
+	@Override
+	public String mapLuaScript() {
+		return ""
+				+ parent.mapLuaScript()
 				+ "  \n"
-				+ "local graphPatternKey = KEYS[1] \n"
-				+ "local logKey = KEYS[2] \n"
-				+ "\n"
-				+ "local graphPatternLen = redis.call('llen', graphPatternKey) \n"
-				+ "for graphIdx = 0, graphPatternLen - 1, 1 do \n"
-				+ "  local pattern = cjson.decode(redis.call('lindex', graphPatternKey, graphIdx)) \n"
+				+ "log('Distinct') \n"
+				+ "for graphIdx, pattern in ipairs(mapResults) do \n"
+				+ "  log('  processing: ' .. cjson.encode(pattern)) \n"
 				+ "  local newPattern = {}"
 				+ "  local seen = {} \n"
 				+ "  for i, row in ipairs(pattern) do \n"
@@ -29,28 +41,76 @@ public class Distinct implements RedisOP {
 				+ "      seen[rowJson] = true \n"
 				+ "    end \n"
 				+ "  end \n"
-				+ "  -- put the jsonified result table into graphPatternKey \n"
-				+ "  redis.call('lset', graphPatternKey, graphIdx, cjson.encode(newPattern)) \n"
+				+ "  mapResults[graphIdx] = newPattern \n"
 				+ "end \n"
-				+ "-- we're done \n"
-				+ "return 1 \n"
 				+ "";
-		
 	}
 
 
-	
+
 	@Override
-	public String execute(ShardedRedisTripleStore ts, String keyspace,
-			String graphPatternKey) {
-		String distinctScriptHandle = ts.loadScript(distinctScript);
+	public QueryResult reduce(Stack<QueryResult> patternStack) {
+		QueryResult origResult = parent.reduce(patternStack);
+		QueryResult result = new QueryResult(origResult.columnNames);
 		
-		ArrayList<Object> results = new ArrayList<Object>();
-		for(Jedis j: ts.shards){
-			results.add(j.evalsha(distinctScriptHandle, 2, graphPatternKey, keyspace + "distinct:log"));
+		Set<String> seenRows = new HashSet<String>();
+		for(List<String> row : origResult.rows){
+			StringBuilder sb = new StringBuilder();
+			for(String d:row){
+				sb.append(d);
+			}
+			String sig = sb.toString();
+			if(!seenRows.contains(sig)){
+				result.addRow(row);
+				seenRows.add(sig);
+			}
 		}
 		
-		return graphPatternKey;
+		return result;
 	}
+
+
+
+	@Override
+	public Boolean completeAfterMapPhase() {
+		return false;
+	}
+
+
+
+	@Override
+	public String toString(String indent) {
+		return "Distinct {\n" +
+				indent + "  " + parent.toString(indent + "  ") + "\n" +
+				indent + "}\n";
+	}
+
+
+
+	@Override
+	public Boolean tryAddFilter(RedisExpressionVisitor rev) {
+		return parent.tryAddFilter(rev);
+	}
+
+
+
+	@Override
+	public RedisOP tryConvertToJoin(RedisOP op, Boolean left) {
+		RedisOP attempt = parent.tryConvertToJoin(op, left);
+		if(attempt != null){
+			this.parent = attempt;
+			return this;
+		}
+		return null;
+	}
+
+
+
+	@Override
+	public Set<String> getJoinVariables() {
+		return parent.getJoinVariables();
+	}
+
+
 
 }

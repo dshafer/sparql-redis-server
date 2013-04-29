@@ -9,20 +9,35 @@ import org.json.JSONArray;
 
 public class QueryResult {
     
-	List<String> columnNames;
-	List<List<String>> rows;
+	public List<String> columnNames;
+	public List<List<String>> rows;
 	Boolean initialized;
 	
 	public QueryResult(){
 		initialized = false;
 		rows = new ArrayList<List<String>>();
 	}
+	
+	public QueryResult(List<String> _columnNames){
+		columnNames = _columnNames;
+		rows = new ArrayList<List<String>>();
+		initialized = true;
+	}
+	
+	public void addRow(List<String> row){
+		rows.add(row);
+	}
+	
 	private ArrayList<String> JSONArrayToArrayList(JSONArray ja){
 		ArrayList<String> result = new ArrayList<String>(ja.length());
 		for(int i = 0; i < ja.length(); i++){
 			result.add(ja.getString(i));
 		}
 		return result;
+	}
+	
+	public void append(QueryResult from){
+		rows.addAll(from.rows);
 	}
 
 	public void addPatternFromJSON(String patternJSON) {
@@ -54,7 +69,10 @@ public class QueryResult {
             throw new NullPointerException("pad cannot be null");
         if (pad.length() <= 0)
             throw new IllegalArgumentException("pad cannot be empty");
-        if (s == null || size <= s.length())
+        if(s == null){
+        	s = "null";
+        }
+        if (size <= s.length())
             return s;
 
         StringBuilder sb = new StringBuilder();
@@ -70,14 +88,19 @@ public class QueryResult {
     
 	public String asTable(){
 		StringBuilder sb = new StringBuilder();
-		int numCols = columnNames.size();
+		int numCols = 0;
+		for(String colName : columnNames){
+			if(!colName.startsWith("META_")){
+				numCols++;
+			}
+		}
 		List<Integer> colWidths = new ArrayList<Integer>(numCols);
 		for(int c = 0; c < numCols; c++){
-			colWidths.add(8);
+			colWidths.add(columnNames.get(c).length());
 		}
 		for(List<String> row:rows){
 			for(int c = 0; c < numCols; c++){
-				if (colWidths.get(c) < row.get(c).length()){
+				if ((row.get(c) != null) && (colWidths.get(c) < row.get(c).length())){
 					colWidths.set(c, row.get(c).length());
 				}
 			}

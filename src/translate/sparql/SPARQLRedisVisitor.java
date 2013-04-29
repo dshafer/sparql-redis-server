@@ -4,13 +4,16 @@
  */
 package translate.sparql;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 import java.util.Queue;
 
@@ -19,14 +22,27 @@ import main.DataTypes.GraphResult;
 
 import redis.clients.jedis.Jedis;
 import translate.redis.BGP;
-import translate.redis.MapPhaseDistinct;
+import translate.redis.ExpressionOptimizer;
+import translate.redis.Distinct;
 import translate.redis.MapPhaseFilter;
+import translate.redis.MapPhaseJoin;
 import translate.redis.MapPhaseLeftJoin;
+import translate.redis.MapPhaseOrder;
 import translate.redis.MapPhaseProject;
+import translate.redis.MapPhaseUnion;
+import translate.redis.RedisExpressionVisitor;
+import translate.redis.RedisFilterOP;
+import translate.redis.RedisJoinOP;
 import translate.redis.RedisOP;
+import translate.redis.RedisProjectOP;
+import translate.redis.ReducePhaseFilter;
 import translate.redis.ReducePhaseJoin;
+import translate.redis.ReducePhaseLeftJoin;
+import translate.redis.ReducePhaseOrder;
+import translate.redis.ReducePhaseProject;
+import translate.redis.ReducePhaseSlice;
 
-
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.SortCondition;
@@ -68,6 +84,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.core.VarExprList;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprAggregator;
+import com.hp.hpl.jena.sparql.expr.ExprList;
 
 //import translate.sql.BGP;
 //import translate.sql.JOIN;
@@ -85,10 +102,17 @@ public class SPARQLRedisVisitor implements OpVisitor
 	String baseURI = "";
 	int maxNumOfKeys = 0;
 	ShardedRedisTripleStore ts;
+	int opId;
 	
 	public SPARQLRedisVisitor(ShardedRedisTripleStore _ts) 
 	{
 		ts = _ts;
+		opId = 0;
+	}
+	
+	@Override
+	public String toString(){
+		return QueryOP().toString("");
 	}
 	
 	public RedisOP QueryOP(){
@@ -116,60 +140,67 @@ public class SPARQLRedisVisitor implements OpVisitor
 				+ "for i,mapResult in ipairs(mapResults) do \n"
 				+ "  redis.call('rpush', mapResultKey, cjson.encode(mapResult)) \n"
 				+ "end  \n"
-				//+ "redis.call('set', mapResultKey, cjson.encode(mapResults)) \n"
 				+ "";
 		
 		return result;
 	}
 	
-//	private String _execute(ShardedRedisTripleStore ts, String keyspace, String graphPatternKey, String logKey){
-//		RedisOP op = redisOpStack.pop();
-//		if (!redisOpStack.isEmpty()){
-//			graphPatternKey = _execute(ts, keyspace, graphPatternKey, logKey);
-//		}
-//		return op.mapLuaScript(ts, keyspace, graphPatternKey, logKey);
-//	}
-//	
-//	public String execute(ShardedRedisTripleStore ts){
-//		String keyspace = "redisSparql:";
-//		String graphPatternKey = keyspace + "working:graphResult";
-//		String logKey = keyspace + "log";
-//		// make sure the initial graph pattern input is empty
-//		for(Jedis j: ts.shards){
-//			j.del(graphPatternKey);
-//		}
-//		if (!redisOpStack.isEmpty()){
-//			return _execute(ts, keyspace, graphPatternKey, logKey);
-//		}
-//		return null;
-//	}
 	
 	public void visit(OpProject arg0) 
 	{
-		System.out.println(">>>> project = " + arg0.getVars());
-		MapPhaseProject pOp = new MapPhaseProject();
+		RedisOP parentOp = this.redisOpStack.peek();
+		RedisProjectOP projectOp = null;
+		if (redisOpStack.peek().completeAfterMapPhase()){
+			projectOp = new MapPhaseProject(parentOp);
+		} else {
+			projectOp = new ReducePhaseProject(parentOp);
+		}
 		for (Var v : arg0.getVars()) 
 		{
-			pOp.projectVariable(v.getName());
+			projectOp.projectVariable(v.getName());
 		}
-		this.redisOpStack.push(pOp);
+		this.redisOpStack.push(projectOp);
 	}
 
 	
 	public void visit(OpBGP bgp) 
 	{
-		System.out.println(">>>> bgp = " + bgp.getPattern() );
-		Map<String, BGP> subPatterns = new HashMap<String, BGP>();
+		Set<String> subjectVariables = new HashSet<String>();
+		List<List<String>> aliasedTriples = new ArrayList<List<String>>();
 		for (Triple t : bgp.getPattern()) 
 		{
-			String s = ts.getAlias(t.getSubject());
-			String p = ts.getAlias(t.getPredicate());
-			String o = ts.getAlias(t.getObject());
-			if (subPatterns.get(s) == null){
+			Node sn = t.getSubject();
+			Node pn = t.getPredicate();
+			Node on = t.getObject();
+			String s = ts.getAlias(sn);
+			String p = ts.getAlias(pn);
+			String o = ts.getAlias(on);
+			if(sn.isVariable()){
+				subjectVariables.add(s);
+			}
+			List<String> aliasedTriple = new ArrayList<String>();
+			aliasedTriple.add(s);
+			aliasedTriple.add(p);
+			aliasedTriple.add(o);
+			aliasedTriples.add(aliasedTriple);
+		}
+		Map<String, BGP> subPatterns = new HashMap<String, BGP>();
+		for (List<String> aliasedTriple: aliasedTriples){
+			String s = aliasedTriple.get(0);
+			String p = aliasedTriple.get(1);
+			String o = aliasedTriple.get(2);
+			if(subPatterns.get(s) == null){
 				subPatterns.put(s,  new BGP());
 			}
 			subPatterns.get(s).addTriple(s, p, o);
+			if(subjectVariables.contains(o)){
+				if(subPatterns.get(o) == null){
+					subPatterns.put(o,  new BGP());
+				}
+				subPatterns.get(o).addTriple(s, p, o);
+			}
 		}
+		
 		
 		Stack<RedisOP> patternStack = new Stack<RedisOP>();
 		for(BGP b : subPatterns.values()){
@@ -192,111 +223,113 @@ public class SPARQLRedisVisitor implements OpVisitor
 	
 	public void visit(OpReduced arg0) 
 	{
-		System.out.println(">>>> reduced");
-		throw new UnsupportedOperationException();
+		this.redisOpStack.push(new Distinct(this.redisOpStack.peek()));
 	}
 	
 	public void visit(OpDistinct arg0) 
 	{
-		System.out.println(">>>> distinct");
-		throw new UnsupportedOperationException();
+		this.redisOpStack.push(new Distinct(this.redisOpStack.peek()));
 	}
 
-	public void visit(OpFilter arg0) 
+	public void visit(OpFilter arg0)
 	{
-		System.out.println(">>>> filter = " + arg0.getExprs());
-		MapPhaseFilter f = new MapPhaseFilter(redisOpStack.peek());
-		for(Expr e: arg0.getExprs()) 
-		{
-			System.out.println(">>>>>> expr = " + e);
-			f.addFilter(e);
+		List<Expr> nonMapExprs = new ArrayList<Expr>();
+		for(Expr e: arg0.getExprs()){
+			Map<Node, String> nodeAliases = new HashMap<Node, String>();
+			ExpressionOptimizer preProc = new ExpressionOptimizer();
+			RedisExpressionVisitor rev = new RedisExpressionVisitor(ts);
+			e = preProc.optimized(e);
+			System.out.println("optimized expr: " + e);
+			e.visit(rev);
+
+				
+			if(!redisOpStack.peek().tryAddFilter(rev)){
+				nonMapExprs.add(e);
+			}
 		}
-		this.redisOpStack.push(f);
+		for(Expr e: nonMapExprs){
+			redisOpStack.push(new ReducePhaseFilter(redisOpStack.peek(), e));
+			
+		}
 	}
 
 	public void visit(OpJoin arg0) 
 	{
-		System.out.println(">>>> join = " + arg0 );
-//		SqlOP rhs = sqlOpStack.pop();
-//		SqlOP lhs = sqlOpStack.pop();
-//		sqlOpStack.push(new JOIN(++joinIndex, lhs, rhs));
+		RedisOP rhs = redisOpStack.pop();
+		RedisOP lhs = redisOpStack.pop();
+		RedisOP joinedLHS = lhs.tryConvertToJoin(rhs, false);
+		if(joinedLHS != null){
+			redisOpStack.push(joinedLHS);
+		} else {
+			RedisJoinOP lj;
+			if(RedisJoinOP.canJoinInMapPhase(lhs, rhs)){
+				throw new UnsupportedOperationException();
+			} else {
+				lj = new ReducePhaseJoin(lhs, rhs);
+			}
+			redisOpStack.push(lj);
+		}
 	}
 	
 	public void visit(OpLeftJoin arg0) 
 	{
-		System.out.println(">>>> leftjoin = " + arg0 );
-		MapPhaseLeftJoin lj = new MapPhaseLeftJoin();
-		redisOpStack.push(lj);
-		// Filters passed to the left join constructor are included
-		// in the 'ON' clause of the left-join operator.
-		// Filters added using the Query.addFilter method are added 
-		// to the WHERE clause of the left join query.
-		//List<SqlExpr> filters = new LinkedList<SqlExpr>();
+		RedisOP rhs = redisOpStack.pop();
+		RedisOP lhs = redisOpStack.pop();
+		
+		RedisOP joinedLHS = lhs.tryConvertToJoin(rhs, true);
+		if(joinedLHS != null){
+			redisOpStack.push(joinedLHS);
+		} else {
+		
+			RedisJoinOP lj;
+			if(RedisJoinOP.canJoinInMapPhase(lhs, rhs)){
+				lj = new MapPhaseLeftJoin(lhs, rhs);
+			} else {
+				lj = new ReducePhaseLeftJoin(lhs, rhs);
+			}
+			redisOpStack.push(lj);
+
+		}
 		
 		if (arg0.getExprs() != null) 
 		{
-			throw new UnsupportedOperationException("Left Join Filters Not Yet Implemented");
-//			this.visit((OpFilter)OpFilter.filter(arg0.getExprs(), null));
-			
-//			for(Expr e: arg0.getExprs()) 
-//			{
-//				SqlExpr expr = new SqlExpr(baseURI);
-//				e.visit(expr);
-//				filters.add(expr);
-//			}
+			this.visit((OpFilter)OpFilter.filter(arg0.getExprs(), null));
 		}
 		
-//		SqlOP rhs = sqlOpStack.pop();
-//		SqlOP lhs = sqlOpStack.pop();
-//		sqlOpStack.push(new LEFTJOIN(++joinIndex, lhs, rhs, filters));
+
 	}
 	
 	public void visit(OpUnion arg0) 
 	{
-		System.out.println(">>>> union  = " + arg0 );
-//		SqlOP rhs = sqlOpStack.pop();
-//		SqlOP lhs = sqlOpStack.pop();
-//		sqlOpStack.push(new UNION(++joinIndex, lhs, rhs));
+		RedisOP rhs = redisOpStack.pop();
+		RedisOP lhs = redisOpStack.pop();
+		MapPhaseUnion result = new MapPhaseUnion(lhs, rhs);
+		redisOpStack.push(result);
 	}
 	
 	public void visit(OpOrder arg0) 
 	{
-		System.out.println(">>>> order  = " + arg0 );
-//		for (SortCondition c : arg0.getConditions()) 
-//		{
-//			SqlExpr expr = new SqlExpr(baseURI);
-//			c.getExpression().visit(expr);
-//			sqlOpStack.peek().orderBy(expr, c.direction != Query.ORDER_DESCENDING);
-//		}
+		for(SortCondition c: arg0.getConditions()) 
+		{
+			if(redisOpStack.peek().completeAfterMapPhase()){
+				RedisExpressionVisitor rev = new RedisExpressionVisitor(ts);
+				c.getExpression().visit(rev);
+				redisOpStack.push(new MapPhaseOrder(redisOpStack.peek(), rev));
+			} else {
+				redisOpStack.push(new ReducePhaseOrder(redisOpStack.peek(), c.expression));
+			}
+		}
 	}
 	
 	public void visit(OpGroup arg0) 
 	{
-		System.out.println(">>>> group  = " + arg0 );
-		
-//		List<ExprAggregator> aggregators = arg0.getAggregators();
-//		
-//		
-//		for(ExprAggregator e: aggregators) 
-//		{
-//			SqlExpr expr = new SqlExpr(baseURI);
-//			e.getExpr().visit(expr);
-//			sqlOpStack.peek().addAggregator(expr);
-//		}
-//		
-//		//Adding the GROUP BY
-//		VarExprList	varExprList = arg0.getGroupVars();
-//		List<Var> varList = varExprList.getVars();
-//		
-//		for(Var v: varList)
-//		{
-//			sqlOpStack.peek().addGroupBy(v);
-//		}
+		throw new UnsupportedOperationException();
 	}
 	
 	public void visit(OpExtend arg0) 
 	{
-		System.out.println(">>>> extend  = " + arg0 );
+		throw new UnsupportedOperationException();
+//		System.out.println(">>>> extend  = " + arg0 );
 //		VarExprList varExprList = arg0.getVarExprList();
 //		
 //		Iterator<Entry<Var, Expr>> it = varExprList.getExprs().entrySet().iterator();
@@ -318,21 +351,9 @@ public class SPARQLRedisVisitor implements OpVisitor
 
 	public void visit(OpSlice arg0) 
 	{
-		System.out.println(">>>> slice  = " + arg0 );
-		try {
-			//sqlOpStack.peek().slice(arg0.getStart(), arg0.getLength());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		this.redisOpStack.push(new ReducePhaseSlice(this.redisOpStack.peek(), arg0.getStart(), arg0.getLength()));
 	}
 
-	
-	public String toString() 
-	{
-		return "blah";
-		//throw new UnsupportedOperationException("toString not implemented");
-	}
-	
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,5 +465,10 @@ public class SPARQLRedisVisitor implements OpVisitor
 	public void visit(OpTopN opTop) 
 	{
 		throw new UnsupportedOperationException("OpTopN Not implemented");
+	}
+
+	public void optimize() {
+		// TODO Auto-generated method stub
+		
 	}
 }

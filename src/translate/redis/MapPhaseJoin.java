@@ -2,20 +2,20 @@ package translate.redis;
 
 import java.util.Stack;
 
-public class MapPhaseLeftJoin extends RedisJoinOP {
-	public MapPhaseLeftJoin(RedisOP _lhs, RedisOP _rhs){
+public class MapPhaseJoin extends RedisJoinOP {
+	public MapPhaseJoin(RedisOP _lhs, RedisOP _rhs){
 		super(_lhs, _rhs);
+		
 	}
 
 	@Override
 	public String mapLuaScript() {
-		String result = ""
+		String result = " \n"
 				+ lhs.mapLuaScript()
 				+ rhs.mapLuaScript()
 				+ "\n"
-				+ "log('MapPhaseLeftJoin') \n"
-//				+ "\n"
-//				+ "local function hashNaturalLeftJoin(left, right, joinCols) \n"
+				+ "log('MapPhaseJoin') \n"
+//				+ "local function hashNaturalJoin(left, right, joinCols) \n"
 //				+ "  local joinTable = {} \n"
 //				+ "  local resultTable = {} \n"
 //				+ "  local joinSig = '' \n"
@@ -45,14 +45,9 @@ public class MapPhaseLeftJoin extends RedisJoinOP {
 //				+ "    local outputRow = lval \n"
 //				+ "    if joinTable[joinSig] then \n"
 //				+ "      -- has a counterpart in right.  Append the values \n"
-//				+ "      local rval = joinTable[joinSig] \n"
+//				+ "      rval = joinTable[joinSig] \n"
 //				+ "      for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
 //				+ "        table.insert(outputRow, rval[rKeepIndex]) \n"
-//				+ "      end \n"
-//				+ "    else \n"
-//				+ "      -- no counterpart in right.  Append 'null' values encoded as'@' \n"
-//				+ "      for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
-//				+ "        table.insert(outputRow, '@') \n"
 //				+ "      end \n"
 //				+ "    end \n"
 //				+ "    table.insert(resultTable, outputRow) \n"
@@ -60,7 +55,7 @@ public class MapPhaseLeftJoin extends RedisJoinOP {
 //				+ "  return resultTable \n"
 //				+ "end \n"
 //				+ " \n"
-//				+ "local function naturalLeftJoin(left, right) \n"
+//				+ "local function naturalJoin(left, right) \n"
 //				+ "  -- determine join columns\n"
 //				+ "  local joinCols = {} \n"
 //				+ "  for l,lColName in ipairs(left[1]) do \n"
@@ -71,18 +66,19 @@ public class MapPhaseLeftJoin extends RedisJoinOP {
 //				+ "      end \n"
 //				+ "    end \n"
 //				+ "  end \n"
-//				+ "  return hashNaturalLeftJoin(left,right,joinCols) \n"
+//				+ "  return hashNaturalJoin(left,right,joinCols) \n"
 //				+ "end \n"
 				+ "\n"
 				+ "local right = table.remove(mapResults) \n"
 				+ "local left = table.remove(mapResults) \n"
-				+ "table.insert(mapResults, naturalLeftJoin(left, right)) \n"
+				+ "table.insert(mapResults, naturalJoin(left, right)) \n"
 				+ "log('################################') \n"
-				+ "log('MapPhaseLeftJoin inserted result at index ' .. (#mapResults - 1)) \n"
+				+ "log('MapPhaseJoin inserted result at index ' .. (#mapResults - 1)) \n"
 				+ "log('  headers: ' .. cjson.encode(thisMapResult[1])) \n"
 				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
 				+ "log('') \n"
 				+ "";
+		
 		return result;
 	}
 
@@ -91,17 +87,17 @@ public class MapPhaseLeftJoin extends RedisJoinOP {
 		return patternStack.pop();
 	}
 
-	@Override
-	public Boolean completeAfterMapPhase() {
-		return true;
-	}
 
 	@Override
 	public String toString(String indent) {
-		return "MapPhaseLeftJoin {\n" +
-				indent + "  left : " + lhs.toString(indent + "  ") + "\n" +
-				indent + "  right: " + rhs.toString(indent + "  ") + "\n" +
-				indent + "}";
+		return indent + "MapPhaseJoin\n" +
+				lhs.toString(indent + "  ") +
+				rhs.toString(indent + "  ");
+	}
+
+	@Override
+	public Boolean completeAfterMapPhase() {
+		return true;
 	}
 
 }
