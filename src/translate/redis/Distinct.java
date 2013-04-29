@@ -8,6 +8,7 @@ import java.util.Stack;
 
 import org.json.JSONArray;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
 import redis.clients.jedis.Jedis;
@@ -55,10 +56,10 @@ public class Distinct implements RedisOP {
 		QueryResult result = new QueryResult(origResult.columnNames);
 		
 		Set<String> seenRows = new HashSet<String>();
-		for(List<String> row : origResult.rows){
+		for(List<Node> row : origResult.rows){
 			StringBuilder sb = new StringBuilder();
-			for(String d:row){
-				sb.append(d);
+			for(Node n:row){
+				sb.append(n.toString());
 			}
 			String sig = sb.toString();
 			if(!seenRows.contains(sig)){

@@ -1,18 +1,6 @@
 package translate.redis;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.Stack;
-
-import org.json.JSONArray;
-
-import redis.clients.jedis.Jedis;
-
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.expr.Expr;
-
-import main.ShardedRedisTripleStore;
 
 public class MapPhaseProject extends RedisProjectOP {
 	String projectScript;
@@ -48,7 +36,7 @@ public class MapPhaseProject extends RedisProjectOP {
 				+ "    end \n"
 				+ "  end \n"
 				+ "  for j,outputVarName in ipairs(graphPattern[1]) do \n"
-				+ "    log('considering ' .. outputVarName) \n"
+//				+ "    log('considering ' .. outputVarName) \n"
 				+ "    if string.find(outputVarName, '^META_') then \n"
 				+ "      table.insert(projectedVarIndexes, j) \n"
 				+ "    end \n"

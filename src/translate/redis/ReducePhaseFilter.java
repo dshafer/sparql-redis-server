@@ -13,6 +13,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding0;
 import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 public class ReducePhaseFilter implements RedisOP{
 
@@ -35,14 +36,16 @@ public class ReducePhaseFilter implements RedisOP{
 		List<Var> vars = new ArrayList<Var>();
 		for(String colName : pre.columnNames){
 			
-			vars.add(Var.alloc(colName));
+			vars.add(Var.alloc(colName.substring(1)));
 		}
-		for(List<String> row : pre.rows){
+		for(List<Node> row : pre.rows){
 			BindingHashMap bm = new BindingHashMap();
 			for(int v=0; v < vars.size(); v++){
-				bm.add(vars.get(v), Node.createLiteral(row.get(v)));
+				bm.add(vars.get(v), row.get(v));
 			}
-			expr.eval(bm, null);
+			if(expr.eval(bm, null) == NodeValue.TRUE){
+				result.addRow(row);
+			}
 			
 		}
 		return result;

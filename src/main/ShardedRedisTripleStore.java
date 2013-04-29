@@ -1,8 +1,10 @@
 package main;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Stack;
 
 import redis.clients.jedis.Jedis;
@@ -28,13 +30,43 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
 
 public class ShardedRedisTripleStore {
 	Jedis aliasDb;
 	public List<Jedis> shards;
 	int numShards;
 	String insertTripleHandle;
+	
+	public static Node vivifyLiteral(String val, String lang, String dt){
+		RDFDatatype rDT = null;
+		if(dt.equals("xsd:integer")){
+			rDT = XSDDatatype.XSDinteger;
+		} else {
+			if(dt != null) {
+				rDT = new BaseDatatype(dt);
+			}
+		}
+		Node result = ResourceFactory.createTypedLiteral(val, rDT).asNode();
+		return result;
+//		return Node.createLiteral(val, lang, rDT);
+	}
+	
+	static public final PrefixMapping prefixMapping;
+	
+	static {
+		prefixMapping = PrefixMapping.Factory.create();
+		prefixMapping.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
+		prefixMapping.setNsPrefix("bsbm", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/");
+	}
+	
 	public ShardedRedisTripleStore(JedisShardInfo aliasDbInfo, List<JedisShardInfo> tripleDbInfos) {
+		
+		
+
+		
 		aliasDb = new Jedis(aliasDbInfo);
 		
 		shards = new ArrayList<Jedis>();
@@ -52,7 +84,6 @@ public class ShardedRedisTripleStore {
 		// ARGV[4] = 1 if object is literal, 0 otherwise
 		String insertTripleScript = ""
 				+ "local function getLiteralAlias(l) \n"
-				//+ "  l = string.sub(l, 2, -2) \n"
 				+ "  if redis.call('hexists', 'literalAliases', l) == 1 then \n"
 				+ "    return redis.call('hget', 'literalAliases', l) \n"
 				+ "  end \n"
@@ -66,10 +97,10 @@ public class ShardedRedisTripleStore {
 				+ "local objectAliasOrLiteral = ARGV[3] \n"
 				+ "local objectIsLiteral = ARGV[4] \n"
 				+ "local objectAlias = (objectIsLiteral == '1') and getLiteralAlias(objectAliasOrLiteral) or objectAliasOrLiteral \n"
-				+ "local encodedValue = subjectAlias .. ':' .. predicateAlias .. ':' .. objectAlias \n"
+				+ "local encodedValue = cjson.encode({ subjectAlias, predicateAlias, objectAlias}) \n"
 				+ "redis.call('sadd', 'S:' .. subjectAlias, encodedValue) \n"
 				+ "redis.call('sadd', 'P:' .. predicateAlias, encodedValue) \n"
-				+ "if not objectIsLiteral then \n"
+				+ "if objectIsLiteral == '0' then \n"
 				+ "  redis.call('sadd', 'O:' .. objectAlias, encodedValue) \n"
 				+ "end \n"
 				+ "";
@@ -87,21 +118,21 @@ public class ShardedRedisTripleStore {
 	}
 	
 	private Node parseLiteral(String l){
+		//PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>
+		//PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 		if(l.startsWith("\"")){
 			String lV;
 			RDFDatatype dt = null;
 			String lang = null;
-			if(l.contains("\"^^")){
-				int sep = l.indexOf("\"^^");
+			if(l.contains("\"^^<")){
+				int sep = l.indexOf("\"^^<");
 				lV = l.substring(1, sep);
-				String dV = l.substring(sep+3);
+				String dV = l.substring(sep+4, l.length()-1);
 				dt = new BaseDatatype(dV);
-//				Node result = Node.createLiteral(lV, dt);
-//				return result;
 			} else {
 				if(l.startsWith("\"") && !l.endsWith("\"")){  // for text literals that specify language
 					lV = l.substring(1, l.length()-4);
-					lang = l.substring(l.length()-2).toUpperCase();
+					lang = l.substring(l.length()-2);
 				} else {
 					lV = l.substring(1, l.length()-1);
 				}
@@ -132,11 +163,17 @@ public class ShardedRedisTripleStore {
 				String s = line.substring(1,  firstSpace-1);
 				String p = line.substring(firstSpace + 2, secondSpace -1);
 				String o = line.substring(secondSpace + 1, eol);
+				if(o.contains("Product978") && p.contains("reviewFor")){
+					int x = 0;
+				}
 				Node sN = Node.createURI(s);
 				Node pN = Node.createURI(p);
 				Node oN = parseLiteral(o);
 				if(oN == null){
-					oN = Node.createURI(o);
+					oN = Node.createURI(o.substring(1, o.length()-1));
+				}
+				if(oN.toString().contains("catarrhally")){
+					int x = 0;
 				}
 
 				insertTriple(sN, pN, oN);
@@ -182,30 +219,17 @@ public class ShardedRedisTripleStore {
 	}
 	
 	
-	public String getStringFromAlias(String alias){
-		if((alias == null) || alias.startsWith("@")){
-			return null;
-		} else if(alias.startsWith("!")){
-			// this is a literal.  just strip the "!" and return
-			return alias.substring(1);
-		} else {
-			// this is a URI alias
-			return getUriNounFromAlias(aliasDb, alias);
-		}
-	}	
-	
 	public Node getNodeFromAlias(String alias){
 		if((alias == null) || alias.startsWith("@")){
-			return null;
+			return Node.createLiteral("");
 		} else if(alias.startsWith("{")){
-			// this is a literal.  just strip the "!" and return
-			//return alias.substring(1);
 			JSONObject j = new JSONObject(alias);
 			String lV = j.getString("v");
 			RDFDatatype dt = null;
 			String lang = null;
 			if(j.has("d")) {
-				dt = new BaseDatatype(j.getString("d"));
+				String dataType = prefixMapping.expandPrefix(j.getString("d"));
+				dt = new BaseDatatype(j.getString(dataType));
 			}
 			if(j.has("l")){
 				lang = j.getString("l");
@@ -214,6 +238,17 @@ public class ShardedRedisTripleStore {
 		} else {
 			// this is a URI alias
 			return Node.createURI(getUriNounFromAlias(aliasDb, alias));
+		}
+	}
+	
+	public String getAliasOrLiteralValue(Node n){
+		Jedis db = aliasDb;
+		if(n.isURI()){
+			return getUriAlias(db, n);
+		} else if (n.isLiteral()) {
+			return n.getLiteralLexicalForm();
+		} else {
+			return n.toString();
 		}
 	}
 	
@@ -253,7 +288,8 @@ public class ShardedRedisTripleStore {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\"v\":\"" + n.getLiteralLexicalForm() + "\"");
 		if(n.getLiteralDatatype() != null){
-			sb.append(",\"d\":\"" + n.getLiteralDatatypeURI() + "\"");
+			String mapped = prefixMapping.shortForm(n.getLiteralDatatypeURI());
+			sb.append(",\"d\":\"" + mapped + "\"");
 		}
 		if(!n.getLiteralLanguage().equals("")){
 			sb.append(",\"l\":\"" + n.getLiteralLanguage() + "\"");
@@ -406,14 +442,16 @@ public class ShardedRedisTripleStore {
 		while(rowsRemaining){
 			rowCount++;
 			// find next candidate;
-			String val = null; //pieces.get(0).rows.get(rowPtrs[0]).get(sortIdx);
+			String val = null;
 			int nextPiece = -1;
 			for(int x=0; x < pieces.size(); x++){
 				if(rowPtrs[x] < pieces.get(x).rows.size()){
-					String testVal = pieces.get(x).rows.get(rowPtrs[x]).get(sortIdx);
-					if((val == null) || (sortAsc && (testVal.compareTo(val) < 0)) || (!sortAsc && (testVal.compareTo(val) > 0))){
+					Node testVal = pieces.get(x).rows.get(rowPtrs[x]).get(sortIdx);
+					if((val == null) 
+							|| (sortAsc && (testVal.getLiteralLexicalForm().compareTo(val) < 0)) 
+							|| (!sortAsc && (testVal.getLiteralLexicalForm().compareTo(val) > 0))){
 						nextPiece = x;
-						val = testVal;
+						val = testVal.getLiteralLexicalForm();
 					}
 				}
 			}
@@ -433,54 +471,26 @@ public class ShardedRedisTripleStore {
 		
 	}
 	
-	private String luaScriptBoilerplate(){
+	public String luaScriptBoilerplate(){
 	  StringBuilder sb = new StringBuilder();
 	  sb.append(""
-//				  "local function hashJoin(left, right, joinCols) \n"
-//				+ "  local joinTable = {} \n"
-//				+ "  local resultTable = {} \n"
-//				+ "  local joinSig = '' \n"
-//				+ "  local rightJoinCols = {} \n"
-//				+ "  for i, joinCol in ipairs(joinCols) do \n"
-//				+ "    rightJoinCols[joinCol[3]] = true \n"
-//				+ "  end \n"
-//				+ "  local rightKeepCols = {} \n"
-//				+ "  for ri,rColName in ipairs(right[1]) do \n"
-//				+ "    if not rightJoinCols[ri] then \n"
-//				+ "      table.insert(rightKeepCols, ri) \n"
-//				+ "    end \n"
-//				+ "  end \n"
-//				+ "  -- compute a table with the hash of the join keys from the left table \n"
-//				+ "  for l, lval in ipairs(left) do \n"
-//				+ "    joinSig = '' \n"
-//				+ "    for i, joinCol in ipairs(joinCols) do \n"
-//				+ "      joinSig = joinSig .. lval[joinCol[2]] \n"
-//				+ "    end \n"
-////				+ "    log('joinSig/lval is ' .. joinSig .. '/' .. cjson.encode(lval)) \n"
-//				+ "    joinTable[joinSig] = lval \n"
-//				+ "  end \n"
-//				+ "  for r, rval in ipairs(right) do \n"
-//				+ "    joinSig = '' \n"
-//				+ "    for i, joinCol in ipairs(joinCols) do \n"
-//				+ "      joinSig = joinSig .. rval[joinCol[3]] \n"
-//				+ "    end \n"
-//				+ "    if joinTable[joinSig] then \n"
-//				+ "      -- found a good row.  Need to join it together and append the result \n"
-//				+ "      local outputRow = {} \n"
-//				+ "      for li,lItem in ipairs(joinTable[joinSig]) do \n"
-//				+ "        table.insert(outputRow, lItem) \n"
-//				+ "      end \n"
-//				+ "      for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
-//				+ "        table.insert(outputRow, rval[rKeepIndex]) \n"
-//				+ "      end \n"
-//				+ "      table.insert(resultTable, outputRow) \n"
-//				+ "    end \n"
-//				+ "  end \n"
-//				+ "  return resultTable \n"
-//				+ "end \n"
-				
- 
-				
+
+				+ " \n"
+				+ "local function log(s) \n"
+				+ "  local logKey = KEYS[2] \n"
+				+ "  redis.call('rpush', logKey, s) \n"
+				+ "end \n"
+				+ "\n"
+				+ "local mapResultKey = KEYS[1] \n"
+				+ "local mapResults = {} \n"
+				+ "\n" 
+				+ "local function table_copy(t) \n"
+				+ "  local t2 = {} \n"
+				+ "  for k,v in pairs(t) do \n"
+				+ "    t2[k] = v \n"
+				+ "  end \n"
+				+ "  return t2 \n"
+				+ "end \n"
 				+ "local function hashJoin(left, right, joinCols, isLeftJoin) \n"
 				+ "  local joinTable = {} \n"
 				+ "  local resultTable = {} \n"
@@ -511,20 +521,27 @@ public class ShardedRedisTripleStore {
 				+ "    for i, joinCol in ipairs(joinCols) do \n"
 				+ "      joinSig = joinSig .. lval[joinCol[2]] \n"
 				+ "    end \n"
-				+ "    local outputRow = lval \n"
+//				+ "    log('joining on ' .. joinSig) \n"
 				+ "    if joinTable[joinSig] then \n"
-				+ "      -- has a counterpart in right.  Append the values \n"
-				+ "      for i, rval in ipairs(joinTable[joinSig]) do \n"
+//				+ "      log('  left : ' .. cjson.encode(lval)) \n"
+//				+ "      log('  joinTable[joinSig] is ' .. cjson.encode(joinTable[joinSig])) \n"
+				+ "      -- has counterpart(s) in right.  Append the values \n"
+				+ "      for ri, rval in ipairs(joinTable[joinSig]) do \n"
+//				+ "        log('  right: ' .. cjson.encode(rval)) \n"
+				+ "        local outputRow = table_copy(lval) \n"
 				+ "        for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
 				+ "          table.insert(outputRow, rval[rKeepIndex]) \n"
 				+ "        end \n"
+//				+ "        log('  result: ' .. cjson.encode(outputRow)) \n"
 				+ "        table.insert(resultTable, outputRow) \n"
 				+ "      end \n"
 				+ "    elseif isLeftJoin then \n"
 				+ "      -- no counterpart in right.  Append 'null' values encoded as'@' \n"
+				+ "      local outputRow = table_copy(lval) \n"
 				+ "      for ri,rKeepIndex in ipairs(rightKeepCols) do \n"
 				+ "        table.insert(outputRow, '@') \n"
 				+ "      end \n"
+//				+ "      log('  result: ' .. cjson.encode(outputRow)) \n"
 				+ "      table.insert(resultTable, outputRow) \n"
 				+ "    end \n"
 				+ "  end \n"
@@ -545,8 +562,6 @@ public class ShardedRedisTripleStore {
 				+ "  end \n"
 //				+ "  log('joining on cols: ' .. cjson.encode(joinCols)) \n"
 				+ "  local result =  hashJoin(left,right,joinCols, false) \n"
-				+ "  -- log('join result is ' .. cjson.encode(result)) \n"
-				+ "  -- log('join result has ' .. (#result - 1) .. ' rows') \n"
 				+ "  return result \n"
 				+ "end \n" 
 				
@@ -585,7 +600,8 @@ public class ShardedRedisTripleStore {
 				
 				+ "local function getLiteralFromAlias(alias) \n"
 //				+ "  return '!' .. redis.call('hget', 'literalLookup', alias) \n"
-				+ "  return redis.call('hget', 'literalLookup', alias) \n"
+//				+ "  return redis.call('hget', 'literalLookup', alias) \n"
+				+ "  return cjson.decode(redis.call('hget', 'literalLookup', alias)) \n"
 				+ "end \n"
 				
 			  );

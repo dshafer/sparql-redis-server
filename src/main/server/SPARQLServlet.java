@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import main.RedisQueryExecution;
 import main.ShardedRedisTripleStore;
 
 import translate.redis.QueryResult;
@@ -35,48 +36,17 @@ public class SPARQLServlet extends HttpServlet {
 	}
 	
 	private void runQuery(String sparqlQueryStr, HttpServletResponse response) throws Exception {
+		//response.setCharacterEncoding("utf-8");
 		ResultSet sparqlResult = executeSparql(sparqlQueryStr);
 		String returnResponse = ResultSetFormatter.asXMLString(sparqlResult);
-		response.getWriter().write(returnResponse);
+		String newResp = returnResponse.replaceAll("\n", "").replaceAll(">\\s*<", "><");;
+		response.getWriter().write(newResp);
 	}
 
 	public ResultSet executeSparql(String sparql) throws SQLException, IOException, InterruptedException {
-		Query q = QueryFactory.create(sparql);
-		Op op = Algebra.compile(q);
-		System.out.println("This is the Abstract Syntax Tree: ");
-		System.out.println(op.toString());
-		
-		System.out.println("Walking the tree: ");
-		SPARQLRedisVisitor v = new SPARQLRedisVisitor(ts);
-		//SPARQLVisitor v = new SPARQLVisitor();
-		OpWalker.walk(op, v);
-		
-		System.out.println("Translated query :\n" + v.toString());
-		System.out.println("Map script is: \n" + v.luaMapScript());
-		QueryResult result = ts.execute(v);
-		
-		result.unalias(ts);
+		QueryResult result = RedisQueryExecution.execute(sparql, ts);
 		System.out.println(result.asTable());
 		return result;
-//		SparqlHiveLink link = new SparqlHiveLink();
-//		
-//		// Converts SPARQL query to HiveQL
-//		String hiveql = link.convertToHive(sparql);
-//		// System.out.println("\n\n"+hiveql);
-//		String result = null;
-//		String xmlresult = null;
-//		ArrayList<String> projVars = null;
-//		if (hiveql != null) {
-//			System.out.println(hiveql);
-//			// Executes the Hive Query
-//			result = link.execute(hiveql);
-//			System.out.println(result);
-//			// Returns a String representing the SPARQL result in XML
-//			projVars = link.getProjectedVars(sparql);
-//			xmlresult = link.getXmlResult(projVars, result);
-//		}
-		//InputStream in = new ByteArrayInputStream(xmlresult.getBytes("UTF-8"));
-//		return ResultSetFactory.fromXML(new String(""));
 	}
 
 
@@ -104,7 +74,7 @@ public class SPARQLServlet extends HttpServlet {
 			String html = "<html><head><title>SPARQL Endpoint</title></head>"
 					+ "<body>"
 					+ "<h1>SPARQL Endpoint</h1>"
-					+ "<form method=\"POST\" action=\"sparql\"/>"
+					+ "<form method=\"GET\" action=\"sparql\"/>"
 					+ "<textarea rows=\"20\" cols=\"100\" name=\"query\" /></textarea>"
 					+ "</br></br><input type=\"submit\" value=\"Submit SPARQL Query\" />"
 					+ "</form>" + "</body>" + "</html>";

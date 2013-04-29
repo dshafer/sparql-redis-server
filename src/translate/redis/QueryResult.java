@@ -6,9 +6,13 @@ import java.util.List;
 import main.ShardedRedisTripleStore;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_NULL;
+import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.QuerySolutionMap;
 import com.hp.hpl.jena.query.ResultSet;
@@ -17,32 +21,54 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
 
 public class QueryResult implements ResultSet{
     
 	public List<String> columnNames;
-	public List<List<String>> rows;
+	public List<List<Node>> rows;
 	Boolean initialized;
 	
 	public QueryResult(){
 		initialized = false;
-		rows = new ArrayList<List<String>>();
+		rows = new ArrayList<List<Node>>();
 	}
 	
 	public QueryResult(List<String> _columnNames){
 		columnNames = _columnNames;
-		rows = new ArrayList<List<String>>();
+		rows = new ArrayList<List<Node>>();
 		initialized = true;
 	}
 	
-	public void addRow(List<String> row){
+	public void addRow(List<Node> row){
 		rows.add(row);
 	}
-	
-	private ArrayList<String> JSONArrayToArrayList(JSONArray ja){
+
+	private ArrayList<String> JSONArrayToStrArrayList(JSONArray ja){
 		ArrayList<String> result = new ArrayList<String>(ja.length());
 		for(int i = 0; i < ja.length(); i++){
 			result.add(ja.getString(i));
+		}
+		return result;
+	}
+	
+	private ArrayList<Node> JSONArrayToNodeArrayList(JSONArray ja){
+		ArrayList<Node> result = new ArrayList<Node>(ja.length());
+		for(int i = 0; i < ja.length(); i++){
+			JSONObject jo = ja.optJSONObject(i);
+			if(jo != null){
+				String nV = jo.getString("v");
+				String lang = jo.optString("l");
+				String dtS = jo.optString("d");
+				result.add(ShardedRedisTripleStore.vivifyLiteral(nV, lang, dtS));
+//				RDFDatatype dt = null;
+//				if(dtS != null){
+//					dt = new BaseDatatype(ShardedRedisTripleStore.prefixMapping.expandPrefix(dtS));
+//				}
+//				result.add(Node.createLiteral(nV,  lang,  dt));
+			} else {
+				result.add(Node.createURI(ja.getString(i)));
+			}
 		}
 		return result;
 	}
@@ -54,7 +80,7 @@ public class QueryResult implements ResultSet{
 	public void addPatternFromJSON(String patternJSON) {
 		JSONArray data = new JSONArray(patternJSON);
 		if (!initialized){
-			columnNames = JSONArrayToArrayList(data.getJSONArray(0));
+			columnNames = JSONArrayToStrArrayList(data.getJSONArray(0));
 			initialized = true;
 		} else {
 			// validate that column names match previous
@@ -70,7 +96,7 @@ public class QueryResult implements ResultSet{
 		}
 		
 		for(int r = 1; r < data.length(); r++){
-			rows.add(JSONArrayToArrayList(data.getJSONArray(r)));
+			rows.add(JSONArrayToNodeArrayList(data.getJSONArray(r)));
 		}
 	}
 	
@@ -98,12 +124,15 @@ public class QueryResult implements ResultSet{
     }
     
     private String nodeVal(Node n){
+    	if(n == null) {
+    		return "";
+    	}
     	if(n.isLiteral()){
     		return n.getLiteralLexicalForm();
     	} else if(n.isURI()){
     		return n.getURI();
     	} else if(n instanceof Node_NULL){
-    		return "null";
+    		return "";
     	} else {
     		return n.toString();
     	}
@@ -121,7 +150,7 @@ public class QueryResult implements ResultSet{
 		for(int c = 0; c < numCols; c++){
 			colWidths.add(columnNames.get(c).length());
 		}
-		for(List<Node> row:nodeRows){
+		for(List<Node> row:rows){
 			for(int c = 0; c < numCols; c++){
 				int len = nodeVal(row.get(c)).length();
 				if ((row.get(c) != null) && (colWidths.get(c) < len)){
@@ -139,7 +168,7 @@ public class QueryResult implements ResultSet{
 			sb.append(QueryResult.center("", columnWidth, "-") + "|");
 		}
 		sb.append("\n");
-		for(List<Node> row:nodeRows){
+		for(List<Node> row:rows){
 			for(int c = 0; c < numCols; c++){
 				int columnWidth = colWidths.get(c);
 				sb.append(QueryResult.center(nodeVal(row.get(c)), columnWidth, " ") + "|");
@@ -149,17 +178,15 @@ public class QueryResult implements ResultSet{
 		return sb.toString();
 	}
 	
-	List<List<Node>> nodeRows;
 	public void unalias(ShardedRedisTripleStore ts) {
 		int numCols = columnNames.size();
-		nodeRows = new ArrayList<List<Node>>();
-		for(List<String> row : rows){
-			List<Node> nodeRow = new ArrayList<Node>();
+		for(List<Node> row : rows){
 			for(int c = 0; c < numCols; c++){
-				nodeRow.add(ts.getNodeFromAlias(row.get(c)));
-				//row.set(c, ts.getStringFromAlias(row.get(c)));
+				Node n = row.get(c);
+				if(n instanceof Node_URI){
+					row.set(c, ts.getNodeFromAlias(n.getURI()));
+				}
 			}
-			nodeRows.add(nodeRow);
 		}
 	}
 
@@ -170,12 +197,12 @@ public class QueryResult implements ResultSet{
 	public void remove() {
 		// TODO Auto-generated method stub
 		rows.remove(itrPtr);
-		nodeRows.remove(itrPtr);
+		rows.remove(itrPtr);
 	}
 
 	@Override
 	public boolean hasNext() {
-		return itrPtr < nodeRows.size();
+		return itrPtr < rows.size();
 	}
 
 	
@@ -198,7 +225,7 @@ public class QueryResult implements ResultSet{
 	public QuerySolution next() {
 		if(!iterInited) initIter();
 		QuerySolutionMap result = new QuerySolutionMap();
-		List<Node> nodeRow = nodeRows.get(itrPtr);
+		List<Node> nodeRow = rows.get(itrPtr);
 		
 		Model m = ModelFactory.createDefaultModel();
 		
@@ -219,7 +246,7 @@ public class QueryResult implements ResultSet{
 	public Binding nextBinding() {
 		if(!iterInited) initIter();
 		BindingHashMap result = new BindingHashMap();
-		List<Node> nodeRow = nodeRows.get(itrPtr);
+		List<Node> nodeRow = rows.get(itrPtr);
 		
 		for(int c = 0; c < colVars.size(); c++){
 			result.add(colVars.get(c), nodeRow.get(c));

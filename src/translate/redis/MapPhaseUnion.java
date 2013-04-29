@@ -64,8 +64,8 @@ public class MapPhaseUnion implements RedisOP{
 				+ "log('unionHeaders is ' .. cjson.encode(unionHeaders)) \n"
 				+ "log('leftColMapping is ' .. cjson.encode(leftColMapping)) \n"
 				+ "log('rightColMapping is ' .. cjson.encode(rightColMapping)) \n"
-				+ "log('left input is ' .. cjson.encode(left)) \n"
-				+ "log('right input is ' .. cjson.encode(right)) \n"
+//				+ "log('left input is ' .. cjson.encode(left)) \n"
+//				+ "log('right input is ' .. cjson.encode(right)) \n"
 
 				+ "local result = {} \n"
 				+ "table.insert(result, unionHeaders) \n"
@@ -92,7 +92,12 @@ public class MapPhaseUnion implements RedisOP{
 				+ "    end \n"
 				+ "    table.insert(result, newRow) \n"
 				+ "  end \n"
-				+ "end \n"				+ "table.insert(mapResults, result) \n"
+				+ "end \n"				
+				+ "table.insert(mapResults, result) \n"
+				+ "log('################################') \n"
+				+ "log('MapPhaseUnion inserted result at index ' .. (#mapResults - 1)) \n"
+				+ "log('  headers: ' .. cjson.encode(thisMapResult[1])) \n"
+				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
 				+ "";
 		return result;
 	}

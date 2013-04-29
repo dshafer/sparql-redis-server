@@ -9,6 +9,7 @@ import org.json.JSONArray;
 
 import redis.clients.jedis.Jedis;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
@@ -47,13 +48,13 @@ public class ReducePhaseProject extends RedisProjectOP {
 			}
 		}
 		QueryResult projected = new QueryResult(projectedVariables);
-		for(List<String> rawRow: raw.rows){
-			List<String> projectedRow = new ArrayList<String>(rawRow.size());
+		for(List<Node> rawRow: raw.rows){
+			List<Node> projectedRow = new ArrayList<Node>(rawRow.size());
 			for(Integer varIdx: projectedVarIndexes){
 				if(varIdx != -1){
 					projectedRow.add(rawRow.get(varIdx));
 				} else {
-					projectedRow.add("@");
+					projectedRow.add(Node.createLiteral(""));
 				}
 			}
 			projected.addRow(projectedRow);

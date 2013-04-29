@@ -77,9 +77,14 @@ public class RedisExpressionVisitor implements ExprVisitor {
 
 		
 		if(funcName == "lang"){
-			luaExpression.append("string.sub(");
-			func.getArg().visit(this);
-			luaExpression.append(",-4)");
+			Expr arg = func.getArg();
+			if(arg instanceof ExprVar){
+				ExprVar nv = (ExprVar)arg;
+				luaExpression.append("vars['?" + nv.getVarName() + "']['l']");
+				varsMentioned.add(nv.asVar());
+			} else {
+				throw new UnsupportedOperationException();
+			}
 		} else {
 			throw new UnsupportedOperationException();
 					
@@ -89,7 +94,7 @@ public class RedisExpressionVisitor implements ExprVisitor {
 	private String getNodeValueAlias(NodeValue nv){
 		String alias = nodeAliases.get(nv);
 		if (alias == null){
-			alias = ts.getAlias(nv.asNode());
+			alias = ts.getAliasOrLiteralValue(nv.asNode());
 			nodeAliases.put(nv, alias);
 		}
 		return alias;
@@ -107,9 +112,9 @@ public class RedisExpressionVisitor implements ExprVisitor {
 
 			if((arg1 instanceof E_Lang) && (arg2 instanceof NodeValueString)){
 				luaExpression.append("(");
-				// target: (string.sub(vars['text'], -4) == '"@' .. string.lower('EN'))
+				// target: ((vars['?text']['l'] == (string.lower('EN')))
 				arg1.visit(this);
-				luaExpression.append(" == ('\\\"@' .. string.lower(");
+				luaExpression.append(" == (string.lower(");
 				arg2.visit(this);
 				luaExpression.append(")))");
 				hasNonEqualities = true;
@@ -195,7 +200,7 @@ public class RedisExpressionVisitor implements ExprVisitor {
 
 	@Override
 	public void visit(ExprVar nv) {
-		luaExpression.append("vars['?" + nv.getVarName() + "']");
+		luaExpression.append("vars['?" + nv.getVarName() + "']['v']");
 		varsMentioned.add(nv.asVar());
 	}
 

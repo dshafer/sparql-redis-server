@@ -84,7 +84,7 @@ public class SPARQLProcessorMain {
 	    
 	    ShardedRedisTripleStore ts = new ShardedRedisTripleStore(aliasShard, tripleShards);
 	    
-	    if(true && (options.populate != null)){
+	    if(false && (options.populate != null)){
 	    	ts.flushdb();
 	    	ts.loadFromFile(options.populate);
 	    }
@@ -139,7 +139,7 @@ public class SPARQLProcessorMain {
 				"PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/> " +
 				"PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> " +
 				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-				"SELECT ?product ?label " +
+				"SELECT ?product ?label $value " +
 				//"SELECT ?label " +
 				//"SELECT * " +
 				"WHERE { " +
@@ -152,10 +152,11 @@ public class SPARQLProcessorMain {
 		String bsbm0 = 
 				"PREFIX bsbm-inst: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/> " +
 				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-				"SELECT DISTINCT ?product ?label " +
+				"SELECT ?product ?label ?type " +
 				"WHERE { " +
 				"?product rdfs:label ?label ." +
-				"?product a bsbm-inst:ProductType1 ." +
+				//"?product a bsbm-inst:ProductType10 ." +
+				"?product a ?type ." +
 				"} " ;
 		
 		String bsbm1 = 
@@ -168,10 +169,10 @@ public class SPARQLProcessorMain {
 				"WHERE { " +
 				    "?product rdfs:label ?label . " +
 				    "?product a <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType66> . " +
-				    //"?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature3> . " +
-				    //"?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1967> . " +
+				    "?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature3> . " +
+				    "?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1967> . " +
 				    "?product bsbm:productPropertyNumeric1 ?value1 . " +
-					//"FILTER (?value1 > 136) " +
+					"FILTER (?value1 > 136) " +
 					"} " +
 				"ORDER BY ?label " +
 				"LIMIT 10 ";
@@ -239,16 +240,16 @@ public class SPARQLProcessorMain {
 				"	    {  " +
 				"	       ?product rdfs:label ?label . " +
 				"	       ?product rdf:type <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType138> . " +
-				"	       ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature4305> . " +
-				"		   ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1427> . " +
+//				"	       ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature4305> . " +
+//				"		   ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1427> . " +
 				"	       ?product bsbm:productPropertyTextual1 ?propertyTextual . " +
 				"		   ?product bsbm:productPropertyNumeric1 ?p1 . " +
 				"		   FILTER ( ?p1 > 457 ) " +
 				"	    } UNION { " +
 				"	       ?product rdfs:label ?label . " +
 				"	       ?product rdf:type <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType138> . " +
-				"	       ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature4305> . " +
-				"		   ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1444> . " +
+//				"	       ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature4305> . " +
+//				"		   ?product bsbm:productFeature <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1444> . " +
 				"	       ?product bsbm:productPropertyTextual1 ?propertyTextual . " +
 				"		   ?product bsbm:productPropertyNumeric2 ?p2 . " +
 				"		   FILTER ( ?p2> 488 )  " +
@@ -426,23 +427,6 @@ public class SPARQLProcessorMain {
 				"	        <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor7/Offer13035> bsbm:validTo ?validTo } " +
 				"";
 		
-		String dbPedia1 = "PREFIX db: <http://dbpedia.org/resource/> \n" +
-				"PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>  \n" +
-				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>  \n" +
-				"PREFIX cl: <http://dbpedia.org/resource/George_Clooney>  \n" +
-				 
-				"SELECT DISTINCT ?copain ?image WHERE {  \n" +
-				"?film ?p db:George_Clooney ;  \n" +
-				"      ?p2 ?copain;  \n" +
-				" a dbpedia-owl:TelevisionShow .  \n" +
-				"  ?copain a dbpedia-owl:Person ;  \n" +
-				"dbpedia-owl:thumbnail ?image.  \n" +
-				"		 \n" +
-				"  FILTER ( ?copain != db:George_Clooney ).  \n" +
-				"}  \n" +
-				"LIMIT 50  \n" +
-				"";	
-		
 		
 		if(options.listen.equals("true")){
 			try {
@@ -452,21 +436,8 @@ public class SPARQLProcessorMain {
 				e.printStackTrace();
 			}
 		} else {
-			Query q = QueryFactory.create(bsbm00);
-			Op op = Algebra.compile(q);
-			System.out.println("This is the Abstract Syntax Tree: ");
-			System.out.println(op.toString());
-			
-			System.out.println("Walking the tree: ");
-			SPARQLRedisVisitor v = new SPARQLRedisVisitor(ts);
-			//SPARQLVisitor v = new SPARQLVisitor();
-			OpWalker.walk(op, v);
-			
-			System.out.println("Translated query :\n" + v.toString());
-			System.out.println("Map script is: \n" + v.luaMapScript());
-			QueryResult result = ts.execute(v);
-			
-			result.unalias(ts);
+			QueryResult result = RedisQueryExecution.execute(bsbm9, ts);
+
 			System.out.println(result.asTable());
 		}
 

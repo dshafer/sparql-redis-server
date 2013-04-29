@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
 import main.ShardedRedisTripleStore;
@@ -23,10 +24,10 @@ public class ReducePhaseJoin extends RedisJoinOP{
 		return lhs.mapLuaScript() + rhs.mapLuaScript();
 	}
 	
-	protected String joinSignature(List<String> values, List<Integer> joinCols){
+	protected String joinSignature(List<Node> values, List<Integer> joinCols){
 		StringBuilder result = new StringBuilder();
 		for(Integer i:joinCols){
-			result.append(values.get(i));
+			result.append(values.get(i).toString());
 		}
 		return result.toString();
 	}
@@ -66,47 +67,22 @@ public class ReducePhaseJoin extends RedisJoinOP{
 		}
 	}
 	
-	@Override
-	public QueryResult reduce(Stack<QueryResult> patternStack) {
-//		QueryResult right = rhs.reduce(patternStack);
-//		QueryResult left = lhs.reduce(patternStack);
-//
-//		computeJoinCols(left, right);
-//		
-//		Map<String, List<String>> lhsJoinHash = new HashMap<String, List<String>>();
-//		for(List<String> leftRow:left.rows){
-//			lhsJoinHash.put(joinSignature(leftRow, joinColsLeft), leftRow);
-//		}
-//		
-//		QueryResult result = new QueryResult(joinedColNames);
-//		for(List<String> rightRow: right.rows){
-//			List<String> leftRow = lhsJoinHash.get(joinSignature(rightRow, joinColsRight));
-//			if(leftRow != null){
-//				List<String> joinedRow = new ArrayList<String>();
-//				joinedRow.addAll(leftRow);
-//				for(Integer r:rightKeepColIdxs){
-//					joinedRow.add(rightRow.get(r));
-//				}
-//				result.addRow(joinedRow);
-//			}
-//		}
-//		
-//		return result;
-		
+	protected QueryResult _reduce(Stack<QueryResult> patternStack, Boolean leftJoin) {
+	
 		QueryResult right = rhs.reduce(patternStack);
 		QueryResult left = lhs.reduce(patternStack);
 
 		computeJoinCols(left, right);
 		
-		Map<String, List<List<String>>> rhsJoinHash = new HashMap<String, List<List<String>>>();
-		for(List<String> rightRow:right.rows){
-			List<String> rightKeepRow = new ArrayList<String>();
+		Map<String, List<List<Node>>> rhsJoinHash = new HashMap<String, List<List<Node>>>();
+		for(List<Node> rightRow:right.rows){
+			List<Node> rightKeepRow = new ArrayList<Node>();
 			for(Integer r:rightKeepColIdxs){
 				rightKeepRow.add(rightRow.get(r));
 			}
 			String joinSig = joinSignature(rightRow, joinColsRight);
 			if(!rhsJoinHash.containsKey(joinSig)){
-				List<List<String>> matches = new ArrayList<List<String>>();
+				List<List<Node>> matches = new ArrayList<List<Node>>();
 				matches.add(rightKeepRow);
 				rhsJoinHash.put(joinSig, matches);
 			} else {
@@ -115,32 +91,37 @@ public class ReducePhaseJoin extends RedisJoinOP{
 		}
 		
 		QueryResult result = new QueryResult(joinedColNames);
-		List<String> nullStrings = new ArrayList<String>();
+		List<Node> nullNodes = new ArrayList<Node>();
 		for(Integer r:rightKeepColIdxs){
-			nullStrings.add("@");
+			nullNodes.add(Node.createLiteral(""));
 		}
-		for(List<String> leftRow: left.rows){
-			List<String> joinedRow = new ArrayList<String>();
+		for(List<Node> leftRow: left.rows){
+			List<Node> joinedRow = new ArrayList<Node>();
 			joinedRow.addAll(leftRow);
 			
 			String joinSig = joinSignature(leftRow, joinColsLeft);
-			List<List<String>> rhsMatches = rhsJoinHash.get(joinSig);
+			List<List<Node>> rhsMatches = rhsJoinHash.get(joinSig);
 			if(rhsMatches != null){
-				for(List<String> rightRow : rhsMatches)
+				for(List<Node> rightRow : rhsMatches)
 				{
-					List<String> joinedRowN = new ArrayList<String>();
+					List<Node> joinedRowN = new ArrayList<Node>();
 					joinedRowN.addAll(joinedRow);
 					joinedRowN.addAll(rightRow);
 					result.addRow(joinedRowN);
 				}
-			} else {
-				//joinedRow.addAll(nullStrings);
-				//result.addRow(joinedRow);
+			} else if (leftJoin) {
+				joinedRow.addAll(nullNodes);
+				result.addRow(joinedRow);
 			}
 			
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public QueryResult reduce(Stack<QueryResult> patternStack) {
+		return this._reduce(patternStack, false);
 	}
 
 	@Override

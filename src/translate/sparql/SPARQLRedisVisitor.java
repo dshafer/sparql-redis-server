@@ -126,15 +126,7 @@ public class SPARQLRedisVisitor implements OpVisitor
 	 */
 	public String luaMapScript(){
 		String result = ""
-				+ " \n"
-				+ "local function log(s) \n"
-				+ "  local logKey = KEYS[2] \n"
-				+ "  redis.call('rpush', logKey, s) \n"
-				+ "end \n"
-				+ "\n"
-				+ "local mapResultKey = KEYS[1] \n"
-				+ "local mapResults = {} \n"
-				+ "\n"
+
 				+ redisOpStack.peek().mapLuaScript()
 				+ "\n"
 				+ "for i,mapResult in ipairs(mapResults) do \n"
