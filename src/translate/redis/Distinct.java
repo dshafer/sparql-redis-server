@@ -31,7 +31,7 @@ public class Distinct implements RedisOP {
 				+ "  \n"
 				+ "log('Distinct') \n"
 				+ "for graphIdx, pattern in ipairs(mapResults) do \n"
-				+ "  log('  processing: ' .. cjson.encode(pattern)) \n"
+				+ "  log('before: mapResults[' .. graphIdx .. '] : ' .. (#pattern - 1) .. ' rows') \n"
 				+ "  local newPattern = {}"
 				+ "  local seen = {} \n"
 				+ "  for i, row in ipairs(pattern) do \n"
@@ -41,6 +41,7 @@ public class Distinct implements RedisOP {
 				+ "      seen[rowJson] = true \n"
 				+ "    end \n"
 				+ "  end \n"
+				+ "  log('before: mapResults[' .. graphIdx .. '] : ' .. (#newPattern - 1) .. ' rows') \n"
 				+ "  mapResults[graphIdx] = newPattern \n"
 				+ "end \n"
 				+ "";

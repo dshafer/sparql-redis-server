@@ -94,40 +94,40 @@ public class RedisExpressionVisitor implements ExprVisitor {
 		}
 		return alias;
 	}
+	
+	private Boolean exprIsNumeric(Expr e){
+		return (e instanceof NodeValueDecimal) || (e instanceof NodeValueDouble) || (e instanceof NodeValueFloat) || (e instanceof NodeValueInteger);
+	}
 
 	@Override
 	public void visit(ExprFunction2 func) {
-		String opStr;
-		if(func.isFunction()){
-			if(func instanceof E_LangMatches){
-				Expr arg1 = func.getArg1();
-				Expr arg2 = func.getArg2();
+		if(func instanceof E_LangMatches){
+			Expr arg1 = func.getArg1();
+			Expr arg2 = func.getArg2();
 
-				if((arg1 instanceof E_Lang) && (arg2 instanceof NodeValueString)){
-					luaExpression.append("(");
-					// target: (string.sub(vars['text'], -4) == '"@' .. string.lower('EN'))
-					arg1.visit(this);
-					luaExpression.append(" == ('\\\"@' .. string.lower(");
-					arg2.visit(this);
-					luaExpression.append(")))");
-					hasNonEqualities = true;
-				} else {
-					throw new UnsupportedOperationException();
-				}
-				return;
+			if((arg1 instanceof E_Lang) && (arg2 instanceof NodeValueString)){
+				luaExpression.append("(");
+				// target: (string.sub(vars['text'], -4) == '"@' .. string.lower('EN'))
+				arg1.visit(this);
+				luaExpression.append(" == ('\\\"@' .. string.lower(");
+				arg2.visit(this);
+				luaExpression.append(")))");
+				hasNonEqualities = true;
 			} else {
 				throw new UnsupportedOperationException();
 			}
-		} else {
-			opStr = func.getOpName();
+			return;
+		}	
+		String opStr = func.getOpName();
+		if(opStr == null){
+			throw new UnsupportedOperationException();
 		}
-		
 		Expr arg1 = func.getArg1();
 		Expr arg2 = func.getArg2();
 		Boolean numeric = false;
 		Expr constArg = arg1.isConstant() ? arg1 : arg2;
 		if(constArg.isConstant()){
-			numeric |= (arg1 instanceof NodeValueDecimal) || (arg1 instanceof NodeValueDouble) || (arg1 instanceof NodeValueFloat) || (arg1 instanceof NodeValueInteger);
+			numeric = exprIsNumeric(constArg);
 		}
 		// special-case for equalities
 		if(opStr == "="){
@@ -147,21 +147,23 @@ public class RedisExpressionVisitor implements ExprVisitor {
 				opStr = "or";
 			}
 		}
-		luaExpression.append(" ( ");
-		if(numeric){
+		luaExpression.append("(");
+		if(numeric && !(exprIsNumeric(func.getArg1()))){
 			luaExpression.append("tonumber");
 		}
 		luaExpression.append("(");
 		func.getArg1().visit(this);
 		luaExpression.append(") ");
+		
 		luaExpression.append(opStr + " ");
-		if(numeric){
+		
+		if(numeric && !(exprIsNumeric(func.getArg2()))){
 			luaExpression.append("tonumber");
 		}
 		luaExpression.append("(");
 		func.getArg2().visit(this);
-		luaExpression.append(") ");
-		luaExpression.append(" ) ");
+		luaExpression.append(")");
+		luaExpression.append(")");
 	}
 
 	@Override
@@ -184,7 +186,11 @@ public class RedisExpressionVisitor implements ExprVisitor {
 
 	@Override
 	public void visit(NodeValue nv) {
-		luaExpression.append('\'' + getNodeValueAlias(nv) + '\'');
+		if(!exprIsNumeric(nv.getExpr())){
+			luaExpression.append("'" + getNodeValueAlias(nv) + "'");
+		} else {
+			luaExpression.append(getNodeValueAlias(nv));
+		}
 	}
 
 	@Override

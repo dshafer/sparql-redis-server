@@ -11,4 +11,10 @@ public class Options {
 	
 	@Parameter(names = {"-q", "--query-file"}, description = "Path to query file (")
 	public String inputFile;
+	
+	@Parameter(names = {"-l", "--listen"}, description = "Start a SPARQL endpoint instead of running a canned query (default=false)")
+	public String listen = "false";
+	
+	@Parameter(names = {"-lp", "--port"}, description = "Port assignment for SPARQL endpoint (default=8080)")
+	public Integer listenPort = 8080;
 }

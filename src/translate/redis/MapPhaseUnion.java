@@ -110,9 +110,10 @@ public class MapPhaseUnion implements RedisOP{
 
 	@Override
 	public String toString(String indent) {
-		return indent + "MapPhaseUnion\n" +
-			lhs.toString(indent + "  ") +
-			rhs.toString(indent + "  ");
+		return indent + "MapPhaseUnion {\n" +
+			indent + "  left : " + lhs.toString(indent + "  ") + "\n" +
+			indent + "  right: " + rhs.toString(indent + "  ") + "\n" +
+			indent + "}";
 	}
 
 	@Override

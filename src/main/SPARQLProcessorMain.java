@@ -28,6 +28,8 @@ import com.hp.hpl.jena.util.FileManager;
 
 import main.Options;
 import main.ShardedRedisTripleStore;
+import main.server.SPARQLEndpoint;
+
 import org.json.*;
 
 import redis.clients.jedis.Jedis;
@@ -82,23 +84,9 @@ public class SPARQLProcessorMain {
 	    
 	    ShardedRedisTripleStore ts = new ShardedRedisTripleStore(aliasShard, tripleShards);
 	    
-	    if(false && (options.populate != null)){
+	    if(true && (options.populate != null)){
 	    	ts.flushdb();
 	    	ts.loadFromFile(options.populate);
-//	    	Model model = ModelFactory.createDefaultModel();
-//	        InputStream is = FileManager.get().open(options.populate);
-//	        if (is != null) {
-//	            model.read(is, null, "N-TRIPLE");
-//	        } else {
-//	            System.err.println("cannot read " + options.populate);;
-//	        }
-//	        StmtIterator sI = model.listStatements();
-//	        while (sI.hasNext()) {
-//	        	Statement s = sI.nextStatement();
-//	        	ts.insertTriple(s.asTriple());
-//	        }
-//	        sI.close();
-	    	
 	    }
 	    
 		String query1 = 
@@ -315,6 +303,8 @@ public class SPARQLProcessorMain {
 			"	LIMIT 5 " +
 			"";
 		
+		// BSBM doesn't currently use query6, which is the regex query.  Thank god.
+		
 		String bsbm7 = "" +
 				"	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
 				"	PREFIX rev: <http://purl.org/stuff/rev#> " +
@@ -379,6 +369,35 @@ public class SPARQLProcessorMain {
 				"	WHERE { <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromRatingSite1/Review5659> rev:reviewer ?x } " +
 				"";
 		
+		String bsbm10 = "" +
+				"	PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> " +
+				"	PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>  " +
+				"	PREFIX dc: <http://purl.org/dc/elements/1.1/> " +
+
+				"	SELECT DISTINCT ?offer ?price " +
+				"	WHERE { " +
+				"		?offer bsbm:product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer9/Product396> . " +
+				"		?offer bsbm:vendor ?vendor . " +
+				"	    ?offer dc:publisher ?vendor . " +
+				"		?vendor bsbm:country <http://downlode.org/rdf/iso-3166/countries#US> . " +
+				"		?offer bsbm:deliveryDays ?deliveryDays . " +
+				"		FILTER (?deliveryDays <= 3) " +
+				"		?offer bsbm:price ?price . " +
+				"	    ?offer bsbm:validTo ?date . " +
+				"	    FILTER (?date > \"2008-06-20T00:00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> ) " +
+				"	} " +
+				"	ORDER BY xsd:double(str(?price)) " +
+				"	LIMIT 10 " +
+				"";
+		
+		String bsbm11 = "" +
+				"	SELECT ?property ?hasValue ?isValueOf " +
+				"		WHERE { " +
+				"		  { <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor12/Offer21250> ?property ?hasValue } " +
+				"		  UNION " +
+				"		  { ?isValueOf ?property <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromVendor12/Offer21250> } " +
+				"		} " +
+				"";
 		
 		String bsbm12 = "" +
 				"	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
@@ -424,24 +443,32 @@ public class SPARQLProcessorMain {
 				"LIMIT 50  \n" +
 				"";	
 		
-				
-		Query q = QueryFactory.create(bsbm8);
-		Op op = Algebra.compile(q);
-		System.out.println("This is the Abstract Syntax Tree: ");
-		System.out.println(op.toString());
 		
-		System.out.println("Walking the tree: ");
-		SPARQLRedisVisitor v = new SPARQLRedisVisitor(ts);
-		//SPARQLVisitor v = new SPARQLVisitor();
-		OpWalker.walk(op, v);
-		
-		System.out.println("Translated query :\n" + v.toString());
-		System.out.println("Map script is: \n" + v.luaMapScript());
-		QueryResult result = ts.execute(v);
-		
-		result.unalias(ts);
-		System.out.println(result.asTable());
-		
+		if(options.listen.equals("true")){
+			try {
+				SPARQLEndpoint.listen(options.listenPort, ts);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			Query q = QueryFactory.create(bsbm00);
+			Op op = Algebra.compile(q);
+			System.out.println("This is the Abstract Syntax Tree: ");
+			System.out.println(op.toString());
+			
+			System.out.println("Walking the tree: ");
+			SPARQLRedisVisitor v = new SPARQLRedisVisitor(ts);
+			//SPARQLVisitor v = new SPARQLVisitor();
+			OpWalker.walk(op, v);
+			
+			System.out.println("Translated query :\n" + v.toString());
+			System.out.println("Map script is: \n" + v.luaMapScript());
+			QueryResult result = ts.execute(v);
+			
+			result.unalias(ts);
+			System.out.println(result.asTable());
+		}
 
 	}
 

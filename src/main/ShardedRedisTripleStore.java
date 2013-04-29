@@ -18,8 +18,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
 
+import org.json.JSONObject;
+
 import main.DataTypes.GraphResult;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.BaseDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.graph.Triple;
@@ -64,21 +69,9 @@ public class ShardedRedisTripleStore {
 				+ "local encodedValue = subjectAlias .. ':' .. predicateAlias .. ':' .. objectAlias \n"
 				+ "redis.call('sadd', 'S:' .. subjectAlias, encodedValue) \n"
 				+ "redis.call('sadd', 'P:' .. predicateAlias, encodedValue) \n"
-				+ "redis.call('sadd', 'O:' .. objectAlias, encodedValue) \n"
-				//+ "redis.call('rpush', 'log', 'added to O:' .. objectAlias .. ' -> ' .. encodedValue) \n"
-				
-//				+ "local Spo = 'S:' .. subjectAlias \n"
-//				+ "local sPo = 'P:' .. predicateAlias \n"
-//				+ "local spO = 'O:' .. objectAlias \n"
-//				+ "local SPo = 'SP:' .. subjectAlias .. ':' .. predicateAlias \n"
-//				+ "local SpO = 'SO:' .. subjectAlias .. ':' .. objectAlias \n"
-//				+ "local sPO = 'PO:' .. predicateAlias .. ':' .. objectAlias \n"
-//				+ "redis.call('sadd', Spo, predicateAlias .. ':' .. objectAlias) \n"
-//				+ "redis.call('sadd', sPo, subjectAlias .. ':' .. objectAlias) \n"
-//				+ "redis.call('sadd', spO, subjectAlias .. ':' .. predicateAlias) \n"
-//				+ "redis.call('sadd', SPo, objectAlias) \n"
-//				+ "redis.call('sadd', SpO, predicateAlias) \n"
-//				+ "redis.call('sadd', sPO, subjectAlias) \n"
+				+ "if not objectIsLiteral then \n"
+				+ "  redis.call('sadd', 'O:' .. objectAlias, encodedValue) \n"
+				+ "end \n"
 				+ "";
 		
 		for(Jedis db: shards){
@@ -90,6 +83,33 @@ public class ShardedRedisTripleStore {
 		aliasDb.flushDB();
 		for(Jedis db:shards){
 			db.flushDB();
+		}
+	}
+	
+	private Node parseLiteral(String l){
+		if(l.startsWith("\"")){
+			String lV;
+			RDFDatatype dt = null;
+			String lang = null;
+			if(l.contains("\"^^")){
+				int sep = l.indexOf("\"^^");
+				lV = l.substring(1, sep);
+				String dV = l.substring(sep+3);
+				dt = new BaseDatatype(dV);
+//				Node result = Node.createLiteral(lV, dt);
+//				return result;
+			} else {
+				if(l.startsWith("\"") && !l.endsWith("\"")){  // for text literals that specify language
+					lV = l.substring(1, l.length()-4);
+					lang = l.substring(l.length()-2).toUpperCase();
+				} else {
+					lV = l.substring(1, l.length()-1);
+				}
+			}
+			Node result = Node.createLiteral(lV, lang, dt);
+			return result;
+		} else {
+			return null;
 		}
 	}
 	
@@ -114,22 +134,11 @@ public class ShardedRedisTripleStore {
 				String o = line.substring(secondSpace + 1, eol);
 				Node sN = Node.createURI(s);
 				Node pN = Node.createURI(p);
-				Node oN = null;
-				if(o.startsWith("\"")){
-					if(o.contains("\"^^")){
-						int sep = o.indexOf("\"^^");
-						String oV = o.substring(1, sep);
-						oN = Node.createLiteral(oV);
-					} else {
-						if(o.startsWith("\"") && !o.endsWith("\"")){  // for text literals that specify language
-							oN = Node.createLiteral(o);
-						} else {
-							oN = Node.createLiteral(o.substring(1, o.length()-1));
-						}
-					}
-				} else {
-					oN = Node.createURI(o.substring(1, o.length()-1));
+				Node oN = parseLiteral(o);
+				if(oN == null){
+					oN = Node.createURI(o);
 				}
+
 				insertTriple(sN, pN, oN);
 			   // process the line.
 			}
@@ -183,6 +192,29 @@ public class ShardedRedisTripleStore {
 			// this is a URI alias
 			return getUriNounFromAlias(aliasDb, alias);
 		}
+	}	
+	
+	public Node getNodeFromAlias(String alias){
+		if((alias == null) || alias.startsWith("@")){
+			return null;
+		} else if(alias.startsWith("{")){
+			// this is a literal.  just strip the "!" and return
+			//return alias.substring(1);
+			JSONObject j = new JSONObject(alias);
+			String lV = j.getString("v");
+			RDFDatatype dt = null;
+			String lang = null;
+			if(j.has("d")) {
+				dt = new BaseDatatype(j.getString("d"));
+			}
+			if(j.has("l")){
+				lang = j.getString("l");
+			}
+			return Node.createLiteral(lV, lang, dt);
+		} else {
+			// this is a URI alias
+			return Node.createURI(getUriNounFromAlias(aliasDb, alias));
+		}
 	}
 	
 	public String getAlias(Node n){
@@ -218,7 +250,16 @@ public class ShardedRedisTripleStore {
 	}
 	
 	private String getLiteralAlias(Jedis db, Node n){
-		return n.getLiteralValue().toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("{\"v\":\"" + n.getLiteralLexicalForm() + "\"");
+		if(n.getLiteralDatatype() != null){
+			sb.append(",\"d\":\"" + n.getLiteralDatatypeURI() + "\"");
+		}
+		if(!n.getLiteralLanguage().equals("")){
+			sb.append(",\"l\":\"" + n.getLiteralLanguage() + "\"");
+		}
+		sb.append("}");
+		return sb.toString();
 	}
 	
 	
@@ -543,7 +584,8 @@ public class ShardedRedisTripleStore {
 				+ "end \n"
 				
 				+ "local function getLiteralFromAlias(alias) \n"
-				+ "  return '!' .. redis.call('hget', 'literalLookup', alias) \n"
+//				+ "  return '!' .. redis.call('hget', 'literalLookup', alias) \n"
+				+ "  return redis.call('hget', 'literalLookup', alias) \n"
 				+ "end \n"
 				
 			  );

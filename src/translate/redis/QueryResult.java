@@ -7,7 +7,18 @@ import main.ShardedRedisTripleStore;
 
 import org.json.JSONArray;
 
-public class QueryResult {
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Node_NULL;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.QuerySolutionMap;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
+
+public class QueryResult implements ResultSet{
     
 	public List<String> columnNames;
 	public List<List<String>> rows;
@@ -86,6 +97,18 @@ public class QueryResult {
         return sb.toString();
     }
     
+    private String nodeVal(Node n){
+    	if(n.isLiteral()){
+    		return n.getLiteralLexicalForm();
+    	} else if(n.isURI()){
+    		return n.getURI();
+    	} else if(n instanceof Node_NULL){
+    		return "null";
+    	} else {
+    		return n.toString();
+    	}
+    }
+    
 	public String asTable(){
 		StringBuilder sb = new StringBuilder();
 		int numCols = 0;
@@ -98,10 +121,11 @@ public class QueryResult {
 		for(int c = 0; c < numCols; c++){
 			colWidths.add(columnNames.get(c).length());
 		}
-		for(List<String> row:rows){
+		for(List<Node> row:nodeRows){
 			for(int c = 0; c < numCols; c++){
-				if ((row.get(c) != null) && (colWidths.get(c) < row.get(c).length())){
-					colWidths.set(c, row.get(c).length());
+				int len = nodeVal(row.get(c)).length();
+				if ((row.get(c) != null) && (colWidths.get(c) < len)){
+					colWidths.set(c, len);
 				}
 			}
 		}
@@ -115,22 +139,111 @@ public class QueryResult {
 			sb.append(QueryResult.center("", columnWidth, "-") + "|");
 		}
 		sb.append("\n");
-		for(List<String> row:rows){
+		for(List<Node> row:nodeRows){
 			for(int c = 0; c < numCols; c++){
 				int columnWidth = colWidths.get(c);
-				sb.append(QueryResult.center(row.get(c), columnWidth, " ") + "|");
+				sb.append(QueryResult.center(nodeVal(row.get(c)), columnWidth, " ") + "|");
 			}
 			sb.append("\n");
 		}
 		return sb.toString();
 	}
+	
+	List<List<Node>> nodeRows;
 	public void unalias(ShardedRedisTripleStore ts) {
 		int numCols = columnNames.size();
+		nodeRows = new ArrayList<List<Node>>();
 		for(List<String> row : rows){
+			List<Node> nodeRow = new ArrayList<Node>();
 			for(int c = 0; c < numCols; c++){
-				row.set(c, ts.getStringFromAlias(row.get(c)));
+				nodeRow.add(ts.getNodeFromAlias(row.get(c)));
+				//row.set(c, ts.getStringFromAlias(row.get(c)));
+			}
+			nodeRows.add(nodeRow);
+		}
+	}
+
+	
+	/////////   ResultSet implementation //////////
+	int itrPtr = 0;
+	@Override
+	public void remove() {
+		// TODO Auto-generated method stub
+		rows.remove(itrPtr);
+		nodeRows.remove(itrPtr);
+	}
+
+	@Override
+	public boolean hasNext() {
+		return itrPtr < nodeRows.size();
+	}
+
+	
+	List<Var> colVars;
+	List<String> actualVarNames;
+	Boolean iterInited = false;
+	private void initIter(){
+		colVars = new ArrayList<Var>();
+		actualVarNames = new ArrayList<String>();
+		for(String c : columnNames){
+			if(!c.startsWith("META_")){
+				colVars.add(Var.alloc(c.substring(1)));
+				actualVarNames.add(c.substring(1));
 			}
 		}
+		itrPtr = 0;
+		iterInited = true;
+	}
+	@Override
+	public QuerySolution next() {
+		if(!iterInited) initIter();
+		QuerySolutionMap result = new QuerySolutionMap();
+		List<Node> nodeRow = nodeRows.get(itrPtr);
+		
+		Model m = ModelFactory.createDefaultModel();
+		
+		for(int c = 0; c < actualVarNames.size(); c++){
+			result.add(actualVarNames.get(c), m.asRDFNode(nodeRow.get(c)));
+		}
+		
+		itrPtr++;
+		return result;
+	}
+
+	@Override
+	public QuerySolution nextSolution() {
+		return next();
+	}
+
+	@Override
+	public Binding nextBinding() {
+		if(!iterInited) initIter();
+		BindingHashMap result = new BindingHashMap();
+		List<Node> nodeRow = nodeRows.get(itrPtr);
+		
+		for(int c = 0; c < colVars.size(); c++){
+			result.add(colVars.get(c), nodeRow.get(c));
+		}
+		
+		itrPtr++;
+		return result;
+	}
+
+	@Override
+	public int getRowNumber() {
+		if(!iterInited) initIter();
+		return itrPtr;
+	}
+
+	@Override
+	public List<String> getResultVars() {
+		if(!iterInited) initIter();
+		return actualVarNames;
+	}
+
+	@Override
+	public Model getResourceModel() {
+		return ModelFactory.createDefaultModel();
 	}
 
 }
