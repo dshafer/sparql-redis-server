@@ -1,9 +1,13 @@
 package translate.redis;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,7 +64,7 @@ public class QueryResult implements ResultSet{
 				String nV = jo.getString("v");
 				String lang = jo.optString("l");
 				String dtS = jo.optString("d");
-				result.add(ShardedRedisTripleStore.vivifyLiteral(nV, lang, dtS));
+				result.add(ShardedRedisTripleStoreV1.vivifyLiteral(nV, lang, dtS));
 //				RDFDatatype dt = null;
 //				if(dtS != null){
 //					dt = new BaseDatatype(ShardedRedisTripleStore.prefixMapping.expandPrefix(dtS));
@@ -179,15 +183,31 @@ public class QueryResult implements ResultSet{
 	}
 	
 	public void unalias(ShardedRedisTripleStore ts) {
+		long startTime = System.currentTimeMillis();
 		int numCols = columnNames.size();
+		Set<String> aliases = new HashSet<String>();
 		for(List<Node> row : rows){
 			for(int c = 0; c < numCols; c++){
 				Node n = row.get(c);
 				if(n instanceof Node_URI){
-					row.set(c, ts.getNodeFromAlias(n.getURI()));
+					aliases.add(n.getURI());
 				}
 			}
 		}
+		
+		Map<String, Node> aliasLookup = ts.getNodesFromAliases(aliases);
+		
+		for(List<Node> row : rows){
+			for(int c = 0; c < numCols; c++){
+				Node n = row.get(c);
+				if(n instanceof Node_URI){
+					row.set(c, aliasLookup.get(n.getURI()));
+				}
+			}
+		}
+		
+		System.out.println("Unalias: " + (double)(System.currentTimeMillis() - startTime)/1000 + " seconds");
+		
 	}
 
 	

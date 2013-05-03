@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;

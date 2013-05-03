@@ -31,8 +31,11 @@ public class ReducePhaseFilter implements RedisOP{
 
 	@Override
 	public QueryResult reduce(Stack<QueryResult> patternStack) {
+		
 		QueryResult pre = parent.reduce(patternStack);
+		long startTime = System.currentTimeMillis();
 		QueryResult result = new QueryResult(pre.columnNames);
+		
 		List<Var> vars = new ArrayList<Var>();
 		for(String colName : pre.columnNames){
 			
@@ -48,6 +51,7 @@ public class ReducePhaseFilter implements RedisOP{
 			}
 			
 		}
+		System.out.println("ReducePhaseFilter: " + (double)(System.currentTimeMillis() - startTime)/1000 + " seconds");
 		return result;
 	}
 

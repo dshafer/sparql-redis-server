@@ -10,7 +10,7 @@ import java.util.Stack;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
-import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 
 public class ReducePhaseJoin extends RedisJoinOP{
 
@@ -68,10 +68,10 @@ public class ReducePhaseJoin extends RedisJoinOP{
 	}
 	
 	protected QueryResult _reduce(Stack<QueryResult> patternStack, Boolean leftJoin) {
-	
 		QueryResult right = rhs.reduce(patternStack);
 		QueryResult left = lhs.reduce(patternStack);
 
+		long startTime = System.currentTimeMillis();
 		computeJoinCols(left, right);
 		
 		Map<String, List<List<Node>>> rhsJoinHash = new HashMap<String, List<List<Node>>>();
@@ -115,6 +115,7 @@ public class ReducePhaseJoin extends RedisJoinOP{
 			}
 			
 		}
+		System.out.println("ReducePhase" + (leftJoin ? "Left" : "") + "Join: " + (double)(System.currentTimeMillis() - startTime)/1000 + " seconds");
 		
 		return result;
 	}

@@ -12,7 +12,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
 import redis.clients.jedis.Jedis;
-import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 
 public class Distinct implements RedisOP {
 

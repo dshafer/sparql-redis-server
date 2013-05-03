@@ -13,7 +13,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.expr.Expr;
 
-import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 
 public class ReducePhaseProject extends RedisProjectOP {
 	String projectScript;

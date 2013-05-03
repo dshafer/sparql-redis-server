@@ -22,7 +22,7 @@ import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.ExprVisitor;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 
-import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 
 public abstract class MapPhaseFilter extends RedisFilterOP{
 	

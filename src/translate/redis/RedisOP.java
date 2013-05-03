@@ -5,7 +5,7 @@ import java.util.Stack;
 
 import com.hp.hpl.jena.sparql.expr.Expr;
 
-import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 
 public interface RedisOP {
 	public String mapLuaScript();

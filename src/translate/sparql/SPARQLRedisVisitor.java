@@ -18,6 +18,7 @@ import java.util.Stack;
 import java.util.Queue;
 
 import main.ShardedRedisTripleStore;
+import main.ShardedRedisTripleStoreV1;
 import main.DataTypes.GraphResult;
 
 import redis.clients.jedis.Jedis;
@@ -104,9 +105,9 @@ public class SPARQLRedisVisitor implements OpVisitor
 	ShardedRedisTripleStore ts;
 	int opId;
 	
-	public SPARQLRedisVisitor(ShardedRedisTripleStore _ts) 
+	public SPARQLRedisVisitor(ShardedRedisTripleStore ts2) 
 	{
-		ts = _ts;
+		ts = ts2;
 		opId = 0;
 	}
 	
