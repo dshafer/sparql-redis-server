@@ -1,0 +1,6 @@
+{
+    "redisCmd": "/sparql/redis-server",
+    "nodes":{
+        "127.0.0.1":[32,32],
+    },
+}

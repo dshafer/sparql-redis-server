@@ -1,0 +1,12 @@
+/sparql/gen_10M &
+ssh node001 /sparql/gen_10M &
+ssh node002 /sparql/gen_10M &
+ssh node003 /sparql/gen_10M &
+ssh node004 /sparql/gen_10M &
+ssh node005 /sparql/gen_10M &
+ssh node006 /sparql/gen_10M &
+ssh node007 /sparql/gen_10M &
+
+echo jobs launched...
+wait
+echo done

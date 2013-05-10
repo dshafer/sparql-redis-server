@@ -21,14 +21,14 @@ public class ShardedRedisAliasDb extends ClusteredJedis {
 	
 	private final String getAliasScript = "" +
 			"local keyMap = redis.call('hgetall', KEYS[1]) \n" +
-			"redis.call('rpush', 'log', 'initial: ' .. cjson.encode(keyMap)) \n" +
+//			"redis.call('rpush', 'log', 'initial: ' .. cjson.encode(keyMap)) \n" +
 			"local aliasMapKey = 'alias:uri' \n" +
 			"local aliasMapRevKey = 'alias:uri_r' \n" +
 			"local result = {} \n" +
 			"for i = 1, #keyMap, 2 do \n" +
 			"  local k = keyMap[i] \n" +
 			"  local v = keyMap[i+1] \n" +
-			"  redis.call('rpush', 'log', 'k, v is ' .. k .. ',' .. v) \n" +
+//			"  redis.call('rpush', 'log', 'k, v is ' .. k .. ',' .. v) \n" +
 			"  local alias = redis.call('hget', aliasMapKey, k) \n" +
 			"  if not alias then \n" +
 			"    alias = '' .. redis.call('hlen', aliasMapKey) \n" +
@@ -39,7 +39,7 @@ public class ShardedRedisAliasDb extends ClusteredJedis {
 			"  table.insert(result, alias) \n" +
 			"  keyMap[k] = alias \n" +
 			"end \n" +
-			"redis.call('rpush', 'log', 'Returning: ' .. cjson.encode(result)) \n" +
+//			"redis.call('rpush', 'log', 'Returning: ' .. cjson.encode(result)) \n" +
 			"return result \n" +
 			"";
 	
@@ -194,10 +194,20 @@ public class ShardedRedisAliasDb extends ClusteredJedis {
 							result = (List<String>) db.evalsha(getValuesFromAliasesHandle, 1, argKey);
 						} catch (Exception ex) {
 							System.out.println("error while untranslating aliases: " + ex.getMessage());
+							System.err.println("error while untranslating aliases: " + ex.getMessage());
+							ex.printStackTrace(System.out);
+							ex.printStackTrace(System.err);
+							result = new ArrayList<String>();
+							System.out.println("List of offending aliases >>>>>");
+							System.err.println("List of offending aliases >>>>>");
 							for(Map.Entry<String, Node> e : nodeMap.entrySet()){
 								System.out.println(e.getKey().toString());
+								System.err.println(e.getKey().toString());
+								result.add(e.getKey());
+								result.add("http://err.com/err");
 							}
-							System.exit(1);
+							System.out.println("<<<<<");
+							System.err.println("<<<<<");
 						}
 						releaseUniqueKey(db, argKey);
 			
@@ -206,7 +216,11 @@ public class ShardedRedisAliasDb extends ClusteredJedis {
 							strMap.put(shardIdx + ":" + result.get(x*2),  result.get(x*2+1));
 						}
 						for(Map.Entry<String, Node> e : nodeMap.entrySet()){
-							e.setValue(Node.createURI(strMap.get(e.getKey())));
+							try{
+								e.setValue(Node.createURI(strMap.get(e.getKey())));
+							} catch(Exception ex){
+								e.setValue(Node.createURI("http://err.com/err"));
+							}
 						}
 					}
 				}

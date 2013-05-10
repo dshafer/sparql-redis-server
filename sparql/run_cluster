@@ -1,0 +1,77 @@
+#!/bin/bash
+
+INST_TYPE=$1
+NUM_NODES=$2
+NUM_TRIPLES=$3
+JVM_MEM=$4
+: ${JVM_MEM:=256M}
+
+ulimit -n 10000
+
+echo Sanity-checking cluster connectivity...
+/sparql/testping $NUM_NODES
+
+CLUSTER_CONF=/sparql/conf/${INST_TYPE}_${NUM_NODES}node.json
+DATA_DIR=/scratch/sgeadmin/BSBM${NUM_TRIPLES}
+
+TIMESTAMP=`date "+%Y%m%d%H%M%S"`
+RESULT_DIR=/sparql/bsbm/result/bsbm_${INST_TYPE}_${NUM_TRIPLES}_${NUM_NODES}node_${TIMESTAMP}
+mkdir -p ${RESULT_DIR}
+
+echo killing redis-server on all nodes...
+pkill java
+pkill redis-server
+
+for ((i=1;i<$NUM_NODES;i++))
+do
+  NODE_ID=node`printf "%03d" $i`
+  echo killing redis-server on $NODE_ID
+  ssh $NODE_ID pkill java
+  ssh $NODE_ID pkill redis
+done
+
+echo Running BSBM benchmark against redis-sparql-server
+echo Nodes           : $NUM_NODES
+echo Size            : $NUM_TRIPLES
+echo Cluster Config  : $CLUSTER_CONF
+echo JVM Heap        : $JVM_MEM
+echo
+echo Results will be saved to ${RESULT_DIR}
+
+# start the redis servers, then exit
+#CMD="java -Xmx${JVM_MEM} -jar redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -s -d /scratch/sgeadmin/db"
+CMD="java -Xmx${JVM_MEM} -jar redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -s -d ~/db"
+echo Running: ${CMD} | tee -a ${RESULT_DIR}/commands
+${CMD} | tee ${RESULT_DIR}/loading.log
+#java -Xmx${JVM_MEM} -jar redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -s -p ${DATA_DIR}/dataset.nt -d /scratch/db | tee ${RESULT_DIR}/loading.log
+
+# load the data in parallel
+CMD="/sparql/load_cluster_${NUM_NODES} ${INST_TYPE} ${NUM_NODES} ${NUM_TRIPLES} 512M ${RESULT_DIR}"
+echo Running: ${CMD} | tee -a ${RESULT_DIR}/commands
+(time ${CMD}) 2>&1 | tee -a ${RESULT_DIR}/loading.log
+#(time /sparql/load_cluster_${NUM_NODES} ${INST_TYPE} ${NUM_NODES} ${NUM_TRIPLES} ${JVM_MEM} ${RESULT_DIR}) 2>&1 | tee ${RESULT_DIR}/loading.log
+
+# connect to the running redis servers
+CMD="java  -Xmx${JVM_MEM} -jar redis-sparql-server.jar -l -lp 8080 -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -d ~/db"
+echo Running: ${CMD} | tee -a ${RESULT_DIR}/commands
+${CMD} > ${RESULT_DIR}/redis-sparql-server.log &
+#java  -Xmx${JVM_MEM} -jar redis-sparql-server.jar -l -lp 8080 -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -d /scratch/sgeadmin/db > ${RESULT_DIR}/redis-sparql-server.log &
+sleep 2
+
+pushd bsbm
+CMD="./testdriver -idir ${DATA_DIR}/td_data -w 2 -runs 10 http://127.0.0.1:8080/sparql -o ${RESULT_DIR}/results.xml"
+echo Running: ${CMD} >> ${RESULT_DIR}/commands
+${CMD} | tee -a ${RESULT_DIR}/testdriver.log
+#./testdriver -idir ${DATA_DIR}/td_data -w 2 -runs 10 http://127.0.0.1:8080/sparql -o ${RESULT_DIR}/results.xml | tee  -a ${RESULT_DIR}/testdriver.log
+popd
+
+
+echo saving system config data...
+cp ${CLUSTER_CONF} ${RESULT_DIR}
+java -version 2> ${RESULT_DIR}/system_info.txt
+echo >> ${RESULT_DIR}/system_info.txt
+echo MASTER >> ${RESULT_DIR}/system_info.txt
+cat /proc/cpuinfo >> ${RESULT_DIR}/system_info.txt
+cat /proc/meminfo >> ${RESULT_DIR}/system_info.txt
+ 
+echo Done.  Results saved to ${RESULT_DIR}

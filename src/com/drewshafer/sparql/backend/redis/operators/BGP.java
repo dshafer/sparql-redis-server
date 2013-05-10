@@ -143,7 +143,7 @@ public class BGP implements RedisOP {
 		
 		
 		StringBuilder result = new StringBuilder( ""
-				+ "log('map -> BGP_" + id + "') \n"
+//				+ "log('map -> BGP_" + id + "') \n"
 				+ "local tripleTables = {} \n");
 		
 		appendTripleTables(joinVar, result);
@@ -165,7 +165,7 @@ public class BGP implements RedisOP {
 				+ "  thisMapResult[i] = row \n"
 				+ "end \n"
 				+ " \n"
-				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
+//				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
 				+ "\n"
 				+ "");
 		
@@ -177,7 +177,7 @@ public class BGP implements RedisOP {
 				delim = " and ";
 			}
 			result.append(""
-					+ "log('BGP_" + id + " -> Filter') \n"
+//					+ "log('BGP_" + id + " -> Filter') \n"
 					+ "local filterFunc = function(vars) return(" + luaFunc.toString() + ") end \n"
 					+ "\n"
 					+ "local newResult = {} \n"
@@ -191,8 +191,8 @@ public class BGP implements RedisOP {
 					+ "    end \n"
 					+ "    local success, passedFilter = pcall(filterFunc, vars) \n"
 					+ "    if not success then \n"
-					+ "      log('!!!! bad filter eval.  vars is ' .. cjson.encode(vars)) \n"
-					+ "      log('error message: ' .. passedFilter) \n"
+//					+ "      log('!!!! bad filter eval.  vars is ' .. cjson.encode(vars)) \n"
+//					+ "      log('error message: ' .. passedFilter) \n"
 					+ "    elseif passedFilter then \n"
 					+ "      table.insert(newResult, row) \n"
 					+ "    end \n"
@@ -204,12 +204,12 @@ public class BGP implements RedisOP {
 		
 		result.append("" 
 				+ "table.insert(mapResults, thisMapResult) \n"
-				+ "log('################################') \n"
-				+ "log('BGP_" + id + " inserted result at index ' .. (#mapResults - 1)) \n"
-				+ "log('  headers: ' .. cjson.encode(thisMapResult[1])) \n"
-				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
-				+ "log('Final (translated) BGP result is ' .. cjson.encode(thisMapResult)) \n"
-				+ "log('') \n"
+//				+ "log('################################') \n"
+//				+ "log('BGP_" + id + " inserted result at index ' .. (#mapResults - 1)) \n"
+//				+ "log('  headers: ' .. cjson.encode(thisMapResult[1])) \n"
+//				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
+//				+ "log('Final (translated) BGP result is ' .. cjson.encode(thisMapResult)) \n"
+//				+ "log('') \n"
 				);
 		
 		return result.toString();

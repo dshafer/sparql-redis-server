@@ -26,7 +26,7 @@ public class MapPhaseOrder implements RedisOP{
 		
 		result.append( 
 			  "  \n"
-			+ "log('map -> Order') \n"
+//			+ "log('map -> Order') \n"
 			+ "local rowScoreFunc = function(vars) return (" + rev.getLuaFunctionExpression() + ") end \n"
 			+ "-- add the sort column \n"
 			+ "\n"

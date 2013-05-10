@@ -16,7 +16,7 @@ public class MapPhaseJoin extends RedisJoinOP {
 				+ lhs.mapLuaScript()
 				+ rhs.mapLuaScript()
 				+ "\n"
-				+ "log('MapPhaseJoin') \n"
+//				+ "log('MapPhaseJoin') \n"
 //				+ "local function hashNaturalJoin(left, right, joinCols) \n"
 //				+ "  local joinTable = {} \n"
 //				+ "  local resultTable = {} \n"
@@ -74,11 +74,11 @@ public class MapPhaseJoin extends RedisJoinOP {
 				+ "local right = table.remove(mapResults) \n"
 				+ "local left = table.remove(mapResults) \n"
 				+ "table.insert(mapResults, naturalJoin(left, right)) \n"
-				+ "log('################################') \n"
-				+ "log('MapPhaseJoin inserted result at index ' .. (#mapResults - 1)) \n"
-				+ "log('  headers: ' .. cjson.encode(thisMapResult[1])) \n"
-				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
-				+ "log('') \n"
+//				+ "log('################################') \n"
+//				+ "log('MapPhaseJoin inserted result at index ' .. (#mapResults - 1)) \n"
+//				+ "log('  headers: ' .. cjson.encode(thisMapResult[1])) \n"
+//				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
+//				+ "log('') \n"
 				+ "";
 		
 		return result;

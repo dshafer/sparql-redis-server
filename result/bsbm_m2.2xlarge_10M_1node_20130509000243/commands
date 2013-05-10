@@ -1,0 +1,4 @@
+Running: java -Xmx6000M -jar redis-sparql-server.jar -rb /sparql/conf/redis.conf -r /sparql/conf/m2.2xlarge_1node.json -s -d ~/db
+Running: /sparql/load_cluster_1 m2.2xlarge 1 10M 512M /sparql/bsbm/result/bsbm_m2.2xlarge_10M_1node_20130509000243
+Running: java -Xmx6000M -jar redis-sparql-server.jar -l -lp 8080 -rb /sparql/conf/redis.conf -r /sparql/conf/m2.2xlarge_1node.json -d ~/db
+Running: ./testdriver -idir /scratch/sgeadmin/BSBM10M/td_data -w 2 -runs 10 http://127.0.0.1:8080/sparql -o /sparql/bsbm/result/bsbm_m2.2xlarge_10M_1node_20130509000243/results.xml

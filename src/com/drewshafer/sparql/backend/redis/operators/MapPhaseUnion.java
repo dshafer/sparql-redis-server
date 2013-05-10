@@ -22,7 +22,7 @@ public class MapPhaseUnion implements RedisOP{
 				+ lhs.mapLuaScript()
 				+ rhs.mapLuaScript()
 				+ "\n"
-				+ "log('MapPhaseUnion') \n"
+//				+ "log('MapPhaseUnion') \n"
 				+ "\n"
 				
 				+ "local right = table.remove(mapResults) \n"
@@ -101,8 +101,8 @@ public class MapPhaseUnion implements RedisOP{
 //				+ "log('\\n##########union result##########: \\n' .. cjson.encode(result)) \n"
 				
 				+ "table.insert(mapResults, result) \n"
-				+ "log('################################') \n"
-				+ "log('MapPhaseUnion inserted result at index ' .. (#mapResults - 1)) \n"
+//				+ "log('################################') \n"
+//				+ "log('MapPhaseUnion inserted result at index ' .. (#mapResults - 1)) \n"
 //				+ "log('  headers: ' .. cjson.encode(thisMapResult[1])) \n"
 //				+ "log('  ' .. (#thisMapResult - 1) .. ' rows') \n"
 				+ "";

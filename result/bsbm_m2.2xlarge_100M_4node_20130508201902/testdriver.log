@@ -1,0 +1,11 @@
+Reading Test Driver data...done
+Reading query mix file: queries/explore/querymix.txt
+Reading query ignore file: queries/explore/ignoreQueries.txt
+
+Starting test...
+
+-2: 0.00ms, total: 872261ms
+-1: 0.00ms, total: 817568ms
+0: 791697.97ms, total: 791721ms
+1: 792674.53ms, total: 792687ms
+2: 776050.77ms, total: 776060ms

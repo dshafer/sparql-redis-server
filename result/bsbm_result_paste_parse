@@ -1,0 +1,31 @@
+RESULT_FILE=$1
+LOADING_FILE=`dirname ${RESULT_FILE}`/loading.log
+
+echo
+if [ ! -e ${LOADING_FILE} ]
+  then
+    echo ${RESULT_FILE} does not have a corresponding loading.log, skipping
+    exit
+fi
+
+#LOAD_TIME=`grep "Finished loading data in" ${LOADING_FILE} | grep -oEi '\d+\.\d+'`
+LOAD_TIME=`grep "real" ${LOADING_FILE} | grep -oEi '\d+m\d+\.\d+s'`
+#LOAD_TIME=`grep "real" ${LOADING_FILE}`
+echo $RESULT_FILE,
+echo Load Time,${LOAD_TIME}
+echo Query,AQET,AQETG
+for query in 1 2 3 4 5 7 8 9 10 11 12
+do
+  AQET=`xmllint --xpath "string(//query[@nr=\"${query}\"]/aqet)" ${RESULT_FILE}`
+  AQETG=`xmllint --xpath "string(//query[@nr=\"${query}\"]/aqetg)" ${RESULT_FILE}`
+  printf '%s,%0.4f,%0.4f,\n' ${query} ${AQET} ${AQETG}
+done
+echo
+for val in aqet aqetg
+do
+for query in 1 2 3 4 5 7 8 9 10 11 12
+do
+  printf '%s\n' `xmllint --xpath "string(//query[@nr=\"${query}\"]/${val})" ${RESULT_FILE}`
+done
+echo
+done

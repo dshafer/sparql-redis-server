@@ -1,0 +1,4 @@
+mkdir /scratch/sgeadmin/BSBM10M
+cd /scratch/sgeadmin/BSBM10M
+cp -r /sparql/bsbm/* .
+./generate -pc 29000 -nof 8

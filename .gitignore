@@ -38,4 +38,4 @@ local.properties
 *.war
 *.ear
 
-
+.DS_store

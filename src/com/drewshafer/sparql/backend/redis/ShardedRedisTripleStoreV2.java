@@ -15,6 +15,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+
 import com.drewshafer.sparql.Options;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.BaseDatatype;
@@ -38,11 +40,27 @@ public class ShardedRedisTripleStoreV2 extends ClusteredJedis implements Sharded
 	final int BULK_INSERT_BLOCK_SIZE;
 	
 	static public final PrefixMapping prefixMapping;
-	
+	static public String hostname;
 	static {
 		prefixMapping = PrefixMapping.Factory.create();
 		prefixMapping.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
 		prefixMapping.setNsPrefix("bsbm", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/");
+		Process proc;
+		try {
+			proc = Runtime.getRuntime().exec("hostname");
+			BufferedReader stdIn = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+	
+	        // read the output from the command
+			String s = stdIn.readLine();
+		    stdIn.close();
+			hostname = s.replace("\n", "");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			hostname="unknown";
+		}
+
+
 	}
 	
 	private ExecutorService mapExecutor;
@@ -73,13 +91,13 @@ public class ShardedRedisTripleStoreV2 extends ClusteredJedis implements Sharded
 					+ "  local lAlias = '#' .. redis.call('hlen', 'literalAliases') \n"
 					+ "  redis.call('hset', 'literalAliases', l, lAlias) \n"
 					+ "  redis.call('hset', 'literalLookup', lAlias, l) \n"
-					+ "  redis.call('rpush', 'log', 'getLiteralAlias: changed ' .. l .. ' into ' .. lAlias) \n"
+//					+ "  redis.call('rpush', 'log', 'getLiteralAlias: changed ' .. l .. ' into ' .. lAlias) \n"
 					+ "  return lAlias \n"
 					+ "end \n"
 					+ "local tripleList = redis.call('lrange', KEYS[1], '0', '-1') \n"
-					+ "redis.call('rpush', 'log', 'input is: ' .. cjson.encode(tripleList)) \n"
+//					+ "redis.call('rpush', 'log', 'input is: ' .. cjson.encode(tripleList)) \n"
 					+ "for i,tripleJson in ipairs(tripleList) do"
-					+ "  redis.call('rpush', 'log', 'got triple ' .. tripleJson) \n"
+//					+ "  redis.call('rpush', 'log', 'got triple ' .. tripleJson) \n"
 					+ "  local triple = cjson.decode(tripleJson) \n"
 					+ "  local subjectAlias = triple[1] \n"
 					+ "  local predicateAlias = triple[2] \n"
@@ -92,7 +110,7 @@ public class ShardedRedisTripleStoreV2 extends ClusteredJedis implements Sharded
 					+ "  if objectIsLiteral == '0' then \n"
 					+ "    redis.call('sadd', 'O:' .. objectAlias, encodedValue) \n"
 					+ "  end \n"
-					+ "  redis.call('rpush', 'log', 'finished with triple ' .. i) \n"
+//					+ "  redis.call('rpush', 'log', 'finished with triple ' .. i) \n"
 					+ "end \n"
 					+ "";
 			
@@ -299,7 +317,7 @@ public class ShardedRedisTripleStoreV2 extends ClusteredJedis implements Sharded
 					pendingBulkLoadBlocks.decrementAndGet();
 					int lTC = loadedTripleCount.addAndGet(lines.size());
 					if(lTC >= nextPrintThreshold.get()){
-						System.out.println("loadedTripleCount is " + lTC);
+						System.out.println(hostname + ": loadedTripleCount is " + lTC);
 						nextPrintThreshold.addAndGet(PRINT_PROGRESS_GRANULARITY);
 					}
 				}
@@ -597,7 +615,7 @@ public class ShardedRedisTripleStoreV2 extends ClusteredJedis implements Sharded
 				
 
 				
-				+ "local function log(s) \n"
+				+ "local function _log(s) \n"
 				+ "  local logKey = KEYS[2] \n"
 				+ "  redis.call('rpush', logKey, s) \n"
 				+ "end \n"				

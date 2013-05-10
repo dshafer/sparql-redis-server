@@ -1,0 +1,5 @@
+(product)-rdfs_label >(label)
+(product)-a >(%ProductType%)
+(product)-bsbm_productFeature >(%ProductFeature1%)
+(product)-bsbm_productFeature >(%ProductFeature2%)
+(product)-bsbm_productPropertyNumeric1 >(%value1%) 

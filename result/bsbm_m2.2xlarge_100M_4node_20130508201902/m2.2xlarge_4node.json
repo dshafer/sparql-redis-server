@@ -1,0 +1,9 @@
+{
+    "redisCmd": "/sparql/redis-server",
+    "nodes":{
+        "master":[1,1],
+        "node001":[4,4],
+        "node002":[4,4],
+        "node003":[4,4],
+    },
+}

@@ -1,0 +1,11 @@
+(List of Triples)->(Partition URIs)->|a|
+|a|->[AliasDb1]->|b|
+|a|->[AliasDb2]->|b|
+|a|->[AliasDb...]->|b|
+|a|->[AliasDbM]->|b|
+|b|->(Partition Triples)->(JSON Encode)->|c|
+|c|->[TripleDb1]->[Create Literal Aliases1]->[Add Triple to S, P, O sets1]
+|c|->[TripleDb2]->[Create Literal Aliases2]->[Add Triple to S, P, O sets2]
+|c|->[TripleDb...]->[Create Literal Aliases.]->[Add Triple to S, P, O sets.]
+|c|->[TripleDbN]->[Create Literal AliasesN]->[Add Triple to S, P, O setsN]
+

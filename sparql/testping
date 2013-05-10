@@ -1,0 +1,6 @@
+for ((i=1;i<${1};i++))
+do
+  node=`printf "node%03d" $i`
+  echo checking $node
+  ping -c1 $node
+done

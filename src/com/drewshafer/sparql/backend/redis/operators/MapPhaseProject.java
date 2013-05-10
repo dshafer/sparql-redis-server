@@ -24,7 +24,7 @@ public class MapPhaseProject extends RedisProjectOP {
 		String result = ""
 				+ parent.mapLuaScript()
 				+ "  \n"
-				+ "log(\"MapPhaseProject: " + sb.toString() + "\") \n"
+//				+ "log(\"MapPhaseProject: " + sb.toString() + "\") \n"
 				+ "local projectedVarNames = " + sb.toString() + " \n"
 				+ "\n"
 				+ "for i, graphPattern in ipairs(mapResults) do \n"

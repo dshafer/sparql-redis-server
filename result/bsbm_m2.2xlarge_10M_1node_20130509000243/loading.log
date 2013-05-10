@@ -1,0 +1,148 @@
+Started redis-server AliasDb_0 on master:50720
+Started redis-server AliasDb_1 on master:50721
+Started redis-server AliasDb_2 on master:50722
+Started redis-server AliasDb_3 on master:50723
+Started redis-server TripleDb_0 on master:50820
+Started redis-server TripleDb_1 on master:50821
+Started redis-server TripleDb_2 on master:50822
+Started redis-server TripleDb_3 on master:50823
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset6.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset6.nt
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset2.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset2.nt
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset3.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset3.nt
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset4.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset4.nt
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset5.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset5.nt
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset8.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset8.nt
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset1.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset1.nt
+Loading triple data from /scratch/sgeadmin/BSBM10M/dataset7.nt
+Loading triples from /scratch/sgeadmin/BSBM10M/dataset7.nt
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 100000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 200000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 300000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 400000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 500000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 600000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 700000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 800000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1000000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1100000
+master: loadedTripleCount is 1200000
+master: loadedTripleCount is 1200000
+master: loadedTripleCount is 1200000
+master: loadedTripleCount is 1200000
+master: loadedTripleCount is 1200000
+master: loadedTripleCount is 1200000
+master: loadedTripleCount is 1200000
+master: loadedTripleCount is 1200000
+Finished inserting - waiting for threadpool to catch up
+Loaded 1272730 triples.
+Finished loading data in 317.984 secs
+Finished inserting - waiting for threadpool to catch up
+Loaded 1273824 triples.
+Finished loading data in 319.834 secs
+Finished inserting - waiting for threadpool to catch up
+Finished inserting - waiting for threadpool to catch up
+Loaded 1273348 triples.
+Finished loading data in 321.121 secs
+Loaded 1274632 triples.
+Finished loading data in 321.28 secs
+Finished inserting - waiting for threadpool to catch up
+Finished inserting - waiting for threadpool to catch up
+Loaded 1274224 triples.
+Finished loading data in 321.906 secs
+Loaded 1273116 triples.
+Finished loading data in 321.828 secs
+Finished inserting - waiting for threadpool to catch up
+Finished inserting - waiting for threadpool to catch up
+Loaded 1273725 triples.
+Finished loading data in 322.161 secs
+Loaded 1274155 triples.
+Finished loading data in 322.186 secs
+
+real	5m23.479s
+user	0m0.052s
+sys	0m0.048s

@@ -1,0 +1,4 @@
+[Master|Alias DB 0..m;Triple DB 0..n]-[Node N|Alias DB 1..M; Triple DB 1..N]
+[Master]-[...]
+[Master]-[Node002|Alias DB 1..M; Triple DB 1..N]
+[Master]-[Node001|Alias DB 1..M; Triple DB 1..N]

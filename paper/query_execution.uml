@@ -1,0 +1,41 @@
+(JENA: Parse SPARQL to Logical Query)->(Analyzer/Optimizer Creates Physical Plan)->(Get URI Aliases)
+(Get URI Aliases)->(Analyzer/Optimizer Creates Physical Plan)
+(Get URI Aliases)->[Alias DB 1]
+(Get URI Aliases)->[Alias DB 2]
+(Get URI Aliases)->[Alias DB ...]
+(Get URI Aliases)->[Alias DB M]
+(Analyzer/Optimizer Creates Physical Plan)->(Launch Lua Scripts)
+(Launch Lua Scripts)->[Triple DB 1]->(Merge Lua Results)
+(Launch Lua Scripts)->[Triple DB 2]->(Merge Lua Results)
+(Launch Lua Scripts)->[Triple DB ...]->(Merge Lua Results)
+(Launch Lua Scripts)->[Triple DB N]->(Merge Lua Results)->(Reduce/Sort/Join)
+(Reduce/Sort/Join)->(Get URIs from Aliases)
+(Get URIs from Aliases)->(JENA: Convert result to RDF-XML)
+
+V2:
+(start)->(Analyzer/Optimizer Creates Physical Plan)->(Get URI Aliases)
+(Get URI Aliases)->(Analyzer/Optimizer Creates Physical Plan)
+(Get URI Aliases)->[Alias DB 1]
+(Get URI Aliases)->[Alias DB 2]
+(Get URI Aliases)->[Alias DB ...]
+(Get URI Aliases)->[Alias DB M]
+(Analyzer/Optimizer Creates Physical Plan)->(Launch Lua Scripts)
+(Launch Lua Scripts)->[TripleDb1]->[Bgp1]->[Map-phase Filter/Sort/Join1]->(Merge)
+(Launch Lua Scripts)->[TripleDB2]->[Bgp2]->[Map-phase Filter/Sort/Join2]->(Merge)
+(Launch Lua Scripts)->[TripleDb.]->[Bgp.]->[Map-phase Filter/Sort/Join.]->(Merge)
+(Launch Lua Scripts)->[TripleDbN]->[BgpN]->[Map-phase Filter/Sort/JoinN]->(Merge)->(Reduce/Sort/Join)
+(Reduce/Sort/Join)->(UnAlias)->(end)
+
+(start)->(Analyzer/Optimizer Creates Physical Plan)->(Get URI Aliases)
+(Get URI Aliases)->(Analyzer/Optimizer Creates Physical Plan)
+(Get URI Aliases)->[Alias DB 1]
+(Get URI Aliases)->[Alias DB 2]
+(Get URI Aliases)->[Alias DB ...]
+(Get URI Aliases)->[Alias DB M]
+(Analyzer/Optimizer Creates Physical Plan)->(Launch Lua Scripts)
+(Launch Lua Scripts)->[TripleDb1]->[Bgp1]->[Map-phase Filter/Sort/Join1]->(Merge)
+(Launch Lua Scripts)->[TripleDB2]->[Bgp2]->[Map-phase Filter/Sort/Join2]->(Merge)
+(Launch Lua Scripts)->[TripleDb.]->[Bgp.]->[Map-phase Filter/Sort/Join.]->(Merge)
+(Launch Lua Scripts)->[TripleDbN]->[BgpN]->[Map-phase Filter/Sort/JoinN]->(Merge)->(Reduce/Sort/Join)
+(Reduce/Sort/Join)->(Get URIs from Aliases)
+(Get URIs from Aliases)->(JENA: Convert result to RDF-XML)

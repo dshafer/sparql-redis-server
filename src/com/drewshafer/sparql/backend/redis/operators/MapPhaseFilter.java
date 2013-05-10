@@ -33,10 +33,11 @@ public abstract class MapPhaseFilter extends RedisFilterOP{
 		
 		result += 
 			  "  \n"
-			+ "log('map -> Filter') \n"
-			+ "local filterFuncBody = \"" + luaFunc + "\" \n"
-			+ "log('compiling: ' .. filterFuncBody) \n"
-			+ "local filterFunc = loadstring(filterFuncBody)() \n"
+//			+ "log('map -> Filter') \n"
+//			+ "local filterFuncBody = \"" + luaFunc + "\" \n"
+//			+ "log('compiling: ' .. filterFuncBody) \n"
+//			+ "local filterFunc = loadstring(filterFuncBody)() \n"
+			+ "local filterFunc = function(vars) return(" + luaFunc + ") end \n"
 			+ "\n"
 			+ "for i,mapResult in ipairs(mapResults) do\n"
 			+ "  local newResult = {} \n"
@@ -52,9 +53,9 @@ public abstract class MapPhaseFilter extends RedisFilterOP{
 			+ "          vars[varName] = row[vi] \n"
 			+ "        end"
 			+ "      end \n"
-			+ "      log('vars is ' .. cjson.encode(vars)) \n"
+//			+ "      log('vars is ' .. cjson.encode(vars)) \n"
 			+ "      if filterFunc(vars) then \n"
-			+ "        log('  passed filter') \n"
+//			+ "        log('  passed filter') \n"
 			+ "        table.insert(newResult, row) \n"
 			+ "      end \n"
 			+ "    end \n"
@@ -62,7 +63,7 @@ public abstract class MapPhaseFilter extends RedisFilterOP{
 			+ "   \n"
 			+ "  mapResults[i] = newResult \n"
 			+ "end \n"
-			+ "log('MapPhaseFilter: After all joins, thisMapResult has ' .. (#thisMapResult - 1) .. ' rows') \n"
+//			+ "log('MapPhaseFilter: After all joins, thisMapResult has ' .. (#thisMapResult - 1) .. ' rows') \n"
 			
 			+ "";
 		return result;

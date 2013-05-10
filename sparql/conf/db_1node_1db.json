@@ -1,0 +1,13 @@
+{
+    "redisCmd": "/sparql/redis-server",
+    "aliasDb" : {
+        "host":"127.0.0.1",
+        "port":50721
+    },
+    "tripleDb" : [
+        {
+            "host":"127.0.0.1",
+            "port":50722
+        }
+    ]
+}

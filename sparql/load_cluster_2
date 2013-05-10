@@ -1,0 +1,24 @@
+#!/bin/bash
+
+INST_TYPE=$1
+NUM_NODES=$2
+NUM_TRIPLES=$3
+JVM_MEM=$4
+: ${JVM_MEM:=256M}
+RESULT_DIR=$5
+
+CLUSTER_CONF=/sparql/conf/${INST_TYPE}_${NUM_NODES}node.json
+DATA_DIR=/scratch/sgeadmin/BSBM${NUM_TRIPLES}
+
+# load partitioned data into the redis servers, then exit
+ssh master java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset1.nt -d ~/db &
+ssh master java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset2.nt -d ~/db &
+ssh master java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset3.nt -d ~/db &
+ssh master java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset4.nt -d ~/db &
+ssh node001 java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset5.nt -d ~/db  &
+ssh node001 java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset6.nt -d ~/db  &
+ssh node001 java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset7.nt -d ~/db  &
+ssh node001 java -Xmx${JVM_MEM} -jar /sparql/redis-sparql-server.jar -rb /sparql/conf/redis.conf -r ${CLUSTER_CONF} -p ${DATA_DIR}/dataset8.nt -d ~/db  &
+
+wait
+

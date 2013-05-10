@@ -1,0 +1,1172 @@
+Started redis-server AliasDb_0 on node015:50720
+Started redis-server AliasDb_1 on node015:50721
+Started redis-server AliasDb_2 on node015:50722
+Started redis-server AliasDb_3 on node015:50723
+Started redis-server AliasDb_4 on node001:50720
+Started redis-server AliasDb_5 on node001:50721
+Started redis-server AliasDb_6 on node001:50722
+Started redis-server AliasDb_7 on node001:50723
+Started redis-server AliasDb_8 on node013:50720
+Started redis-server AliasDb_9 on node013:50721
+Started redis-server AliasDb_10 on node013:50722
+Started redis-server AliasDb_11 on node013:50723
+Started redis-server AliasDb_12 on node014:50720
+Started redis-server AliasDb_13 on node014:50721
+Started redis-server AliasDb_14 on node014:50722
+Started redis-server AliasDb_15 on node014:50723
+Started redis-server AliasDb_16 on node005:50720
+Started redis-server AliasDb_17 on node005:50721
+Started redis-server AliasDb_18 on node005:50722
+Started redis-server AliasDb_19 on node005:50723
+Started redis-server AliasDb_20 on node012:50720
+Started redis-server AliasDb_21 on node012:50721
+Started redis-server AliasDb_22 on node012:50722
+Started redis-server AliasDb_23 on node012:50723
+Started redis-server AliasDb_24 on node004:50720
+Started redis-server AliasDb_25 on node004:50721
+Started redis-server AliasDb_26 on node004:50722
+Started redis-server AliasDb_27 on node004:50723
+Started redis-server AliasDb_28 on node011:50720
+Started redis-server AliasDb_29 on node011:50721
+Started redis-server AliasDb_30 on node011:50722
+Started redis-server AliasDb_31 on node011:50723
+Started redis-server AliasDb_32 on node003:50720
+Started redis-server AliasDb_33 on node003:50721
+Started redis-server AliasDb_34 on node003:50722
+Started redis-server AliasDb_35 on node003:50723
+Started redis-server AliasDb_36 on node010:50720
+Started redis-server AliasDb_37 on node010:50721
+Started redis-server AliasDb_38 on node010:50722
+Started redis-server AliasDb_39 on node010:50723
+Started redis-server AliasDb_40 on node002:50720
+Started redis-server AliasDb_41 on node002:50721
+Started redis-server AliasDb_42 on node002:50722
+Started redis-server AliasDb_43 on node002:50723
+Started redis-server AliasDb_44 on node009:50720
+Started redis-server AliasDb_45 on node009:50721
+Started redis-server AliasDb_46 on node009:50722
+Started redis-server AliasDb_47 on node009:50723
+Started redis-server AliasDb_48 on node008:50720
+Started redis-server AliasDb_49 on node008:50721
+Started redis-server AliasDb_50 on node008:50722
+Started redis-server AliasDb_51 on node008:50723
+Started redis-server AliasDb_52 on node007:50720
+Started redis-server AliasDb_53 on node007:50721
+Started redis-server AliasDb_54 on node007:50722
+Started redis-server AliasDb_55 on node007:50723
+Started redis-server AliasDb_56 on node006:50720
+Started redis-server AliasDb_57 on node006:50721
+Started redis-server AliasDb_58 on node006:50722
+Started redis-server AliasDb_59 on node006:50723
+Started redis-server TripleDb_0 on node015:50820
+Started redis-server TripleDb_1 on node015:50821
+Started redis-server TripleDb_2 on node015:50822
+Started redis-server TripleDb_3 on node015:50823
+Started redis-server TripleDb_4 on node001:50820
+Started redis-server TripleDb_5 on node001:50821
+Started redis-server TripleDb_6 on node001:50822
+Started redis-server TripleDb_7 on node001:50823
+Started redis-server TripleDb_8 on node013:50820
+Started redis-server TripleDb_9 on node013:50821
+Started redis-server TripleDb_10 on node013:50822
+Started redis-server TripleDb_11 on node013:50823
+Started redis-server TripleDb_12 on node014:50820
+Started redis-server TripleDb_13 on node014:50821
+Started redis-server TripleDb_14 on node014:50822
+Started redis-server TripleDb_15 on node014:50823
+Started redis-server TripleDb_16 on node005:50820
+Started redis-server TripleDb_17 on node005:50821
+Started redis-server TripleDb_18 on node005:50822
+Started redis-server TripleDb_19 on node005:50823
+Started redis-server TripleDb_20 on node012:50820
+Started redis-server TripleDb_21 on node012:50821
+Started redis-server TripleDb_22 on node012:50822
+Started redis-server TripleDb_23 on node012:50823
+Started redis-server TripleDb_24 on node004:50820
+Started redis-server TripleDb_25 on node004:50821
+Started redis-server TripleDb_26 on node004:50822
+Started redis-server TripleDb_27 on node004:50823
+Started redis-server TripleDb_28 on node011:50820
+Started redis-server TripleDb_29 on node011:50821
+Started redis-server TripleDb_30 on node011:50822
+Started redis-server TripleDb_31 on node011:50823
+Started redis-server TripleDb_32 on node003:50820
+Started redis-server TripleDb_33 on node003:50821
+Started redis-server TripleDb_34 on node003:50822
+Started redis-server TripleDb_35 on node003:50823
+Started redis-server TripleDb_36 on node010:50820
+Started redis-server TripleDb_37 on node010:50821
+Started redis-server TripleDb_38 on node010:50822
+Started redis-server TripleDb_39 on node010:50823
+Started redis-server TripleDb_40 on node002:50820
+Started redis-server TripleDb_41 on node002:50821
+Started redis-server TripleDb_42 on node002:50822
+Started redis-server TripleDb_43 on node002:50823
+Started redis-server TripleDb_44 on node009:50820
+Started redis-server TripleDb_45 on node009:50821
+Started redis-server TripleDb_46 on node009:50822
+Started redis-server TripleDb_47 on node009:50823
+Started redis-server TripleDb_48 on node008:50820
+Started redis-server TripleDb_49 on node008:50821
+Started redis-server TripleDb_50 on node008:50822
+Started redis-server TripleDb_51 on node008:50823
+Started redis-server TripleDb_52 on node007:50820
+Started redis-server TripleDb_53 on node007:50821
+Started redis-server TripleDb_54 on node007:50822
+Started redis-server TripleDb_55 on node007:50823
+Started redis-server TripleDb_56 on node006:50820
+Started redis-server TripleDb_57 on node006:50821
+Started redis-server TripleDb_58 on node006:50822
+Started redis-server TripleDb_59 on node006:50823
+unlimited
+unlimited
+unlimited
+unlimited
+unlimited
+unlimited
+unlimited
+unlimited
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset7.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset7.nt
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset6.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset6.nt
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset4.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset4.nt
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset8.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset8.nt
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset2.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset2.nt
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset3.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset3.nt
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset5.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset5.nt
+Loading triple data from /scratch/sgeadmin/BSBM100M/dataset1.nt
+Loading triples from /scratch/sgeadmin/BSBM100M/dataset1.nt
+node006: loadedTripleCount is 102000
+node005: loadedTripleCount is 102000
+master: loadedTripleCount is 102000
+node007: loadedTripleCount is 102000
+node002: loadedTripleCount is 102000
+node003: loadedTripleCount is 102000
+node001: loadedTripleCount is 102000
+node004: loadedTripleCount is 102000
+node005: loadedTripleCount is 204000
+node006: loadedTripleCount is 204000
+node007: loadedTripleCount is 204000
+master: loadedTripleCount is 204000
+node005: loadedTripleCount is 300000
+node006: loadedTripleCount is 300000
+node003: loadedTripleCount is 204000
+node001: loadedTripleCount is 204000
+node002: loadedTripleCount is 204000
+node007: loadedTripleCount is 300000
+node004: loadedTripleCount is 204000
+master: loadedTripleCount is 300000
+node005: loadedTripleCount is 402000
+node003: loadedTripleCount is 300000
+node006: loadedTripleCount is 402000
+node001: loadedTripleCount is 300000
+node007: loadedTripleCount is 402000
+node002: loadedTripleCount is 300000
+node005: loadedTripleCount is 504000
+master: loadedTripleCount is 402000
+node004: loadedTripleCount is 300000
+node006: loadedTripleCount is 504000
+node003: loadedTripleCount is 402000
+node005: loadedTripleCount is 600000
+node007: loadedTripleCount is 504000
+node001: loadedTripleCount is 402000
+master: loadedTripleCount is 504000
+node002: loadedTripleCount is 402000
+node004: loadedTripleCount is 402000
+node006: loadedTripleCount is 600000
+node005: loadedTripleCount is 702000
+node003: loadedTripleCount is 504000
+node007: loadedTripleCount is 600000
+node001: loadedTripleCount is 504000
+master: loadedTripleCount is 600000
+node005: loadedTripleCount is 804000
+node006: loadedTripleCount is 702000
+node002: loadedTripleCount is 504000
+node003: loadedTripleCount is 600000
+node004: loadedTripleCount is 504000
+node007: loadedTripleCount is 702000
+master: loadedTripleCount is 702000
+node005: loadedTripleCount is 900000
+node001: loadedTripleCount is 600000
+node006: loadedTripleCount is 804000
+node003: loadedTripleCount is 702000
+node002: loadedTripleCount is 600000
+node007: loadedTripleCount is 804000
+node005: loadedTripleCount is 1002000
+master: loadedTripleCount is 804000
+node006: loadedTripleCount is 900000
+node004: loadedTripleCount is 600000
+node001: loadedTripleCount is 702000
+node005: loadedTripleCount is 1104000
+node003: loadedTripleCount is 804000
+node006: loadedTripleCount is 1002000
+node007: loadedTripleCount is 900000
+master: loadedTripleCount is 900000
+node002: loadedTripleCount is 702000
+node005: loadedTripleCount is 1200000
+node004: loadedTripleCount is 702000
+node001: loadedTripleCount is 804000
+node006: loadedTripleCount is 1104000
+node003: loadedTripleCount is 900000
+node007: loadedTripleCount is 1002000
+master: loadedTripleCount is 1002000
+node005: loadedTripleCount is 1302000
+node002: loadedTripleCount is 804000
+node006: loadedTripleCount is 1200000
+node001: loadedTripleCount is 900000
+node004: loadedTripleCount is 804000
+node007: loadedTripleCount is 1104000
+node005: loadedTripleCount is 1404000
+master: loadedTripleCount is 1104000
+node003: loadedTripleCount is 1002000
+node006: loadedTripleCount is 1302000
+node005: loadedTripleCount is 1500000
+node002: loadedTripleCount is 900000
+node007: loadedTripleCount is 1200000
+node001: loadedTripleCount is 1002000
+master: loadedTripleCount is 1200000
+node006: loadedTripleCount is 1404000
+node004: loadedTripleCount is 900000
+node003: loadedTripleCount is 1104000
+node005: loadedTripleCount is 1602000
+node007: loadedTripleCount is 1302000
+node006: loadedTripleCount is 1500000
+master: loadedTripleCount is 1302000
+node001: loadedTripleCount is 1104000
+node002: loadedTripleCount is 1002000
+node005: loadedTripleCount is 1704000
+node003: loadedTripleCount is 1200000
+node004: loadedTripleCount is 1002000
+node006: loadedTripleCount is 1602000
+node005: loadedTripleCount is 1800000
+node007: loadedTripleCount is 1404000
+node001: loadedTripleCount is 1200000
+node002: loadedTripleCount is 1104000
+node003: loadedTripleCount is 1302000
+master: loadedTripleCount is 1404000
+node004: loadedTripleCount is 1104000
+node006: loadedTripleCount is 1704000
+node001: loadedTripleCount is 1302000
+node002: loadedTripleCount is 1200000
+node007: loadedTripleCount is 1500000
+node005: loadedTripleCount is 1902000
+node004: loadedTripleCount is 1200000
+node003: loadedTripleCount is 1404000
+master: loadedTripleCount is 1500000
+node002: loadedTripleCount is 1302000
+node006: loadedTripleCount is 1800000
+node004: loadedTripleCount is 1302000
+node003: loadedTripleCount is 1500000
+node005: loadedTripleCount is 2004000
+node007: loadedTripleCount is 1602000
+node001: loadedTripleCount is 1404000
+master: loadedTripleCount is 1602000
+node003: loadedTripleCount is 1602000
+node006: loadedTripleCount is 1902000
+node005: loadedTripleCount is 2100000
+node002: loadedTripleCount is 1404000
+node001: loadedTripleCount is 1500000
+node007: loadedTripleCount is 1704000
+node004: loadedTripleCount is 1404000
+node003: loadedTripleCount is 1704000
+master: loadedTripleCount is 1704000
+node006: loadedTripleCount is 2004000
+node002: loadedTripleCount is 1500000
+node007: loadedTripleCount is 1800000
+node005: loadedTripleCount is 2202000
+node003: loadedTripleCount is 1800000
+node001: loadedTripleCount is 1602000
+node004: loadedTripleCount is 1500000
+master: loadedTripleCount is 1800000
+node006: loadedTripleCount is 2100000
+node005: loadedTripleCount is 2304000
+node007: loadedTripleCount is 1902000
+node003: loadedTripleCount is 1902000
+node002: loadedTripleCount is 1602000
+node001: loadedTripleCount is 1704000
+node004: loadedTripleCount is 1602000
+master: loadedTripleCount is 1902000
+node003: loadedTripleCount is 2004000
+node006: loadedTripleCount is 2202000
+node005: loadedTripleCount is 2400000
+node007: loadedTripleCount is 2004000
+node001: loadedTripleCount is 1800000
+node002: loadedTripleCount is 1704000
+node004: loadedTripleCount is 1704000
+node003: loadedTripleCount is 2100000
+master: loadedTripleCount is 2004000
+node007: loadedTripleCount is 2100000
+node005: loadedTripleCount is 2502000
+node006: loadedTripleCount is 2304000
+node002: loadedTripleCount is 1800000
+node003: loadedTripleCount is 2202000
+node001: loadedTripleCount is 1902000
+node004: loadedTripleCount is 1800000
+master: loadedTripleCount is 2100000
+node005: loadedTripleCount is 2604000
+node006: loadedTripleCount is 2400000
+node007: loadedTripleCount is 2202000
+node002: loadedTripleCount is 1902000
+node001: loadedTripleCount is 2004000
+node003: loadedTripleCount is 2304000
+node004: loadedTripleCount is 1902000
+node005: loadedTripleCount is 2700000
+node006: loadedTripleCount is 2502000
+node003: loadedTripleCount is 2400000
+node007: loadedTripleCount is 2304000
+node002: loadedTripleCount is 2004000
+master: loadedTripleCount is 2202000
+node001: loadedTripleCount is 2100000
+node004: loadedTripleCount is 2004000
+node003: loadedTripleCount is 2502000
+node005: loadedTripleCount is 2802000
+node006: loadedTripleCount is 2604000
+node007: loadedTripleCount is 2400000
+node002: loadedTripleCount is 2100000
+node001: loadedTripleCount is 2202000
+master: loadedTripleCount is 2304000
+node003: loadedTripleCount is 2604000
+node004: loadedTripleCount is 2100000
+node006: loadedTripleCount is 2700000
+node005: loadedTripleCount is 2904000
+node007: loadedTripleCount is 2502000
+node002: loadedTripleCount is 2202000
+node001: loadedTripleCount is 2304000
+node003: loadedTripleCount is 2700000
+master: loadedTripleCount is 2400000
+node004: loadedTripleCount is 2202000
+node006: loadedTripleCount is 2802000
+node005: loadedTripleCount is 3000000
+node007: loadedTripleCount is 2604000
+node001: loadedTripleCount is 2400000
+node003: loadedTripleCount is 2802000
+node002: loadedTripleCount is 2304000
+master: loadedTripleCount is 2502000
+node005: loadedTripleCount is 3102000
+node004: loadedTripleCount is 2304000
+node006: loadedTripleCount is 2904000
+node003: loadedTripleCount is 2904000
+node007: loadedTripleCount is 2700000
+node002: loadedTripleCount is 2400000
+node001: loadedTripleCount is 2502000
+master: loadedTripleCount is 2604000
+node004: loadedTripleCount is 2400000
+node003: loadedTripleCount is 3000000
+node006: loadedTripleCount is 3000000
+node005: loadedTripleCount is 3204000
+node007: loadedTripleCount is 2802000
+node002: loadedTripleCount is 2502000
+node001: loadedTripleCount is 2604000
+node003: loadedTripleCount is 3102000
+master: loadedTripleCount is 2700000
+node005: loadedTripleCount is 3300000
+node006: loadedTripleCount is 3102000
+node004: loadedTripleCount is 2502000
+node007: loadedTripleCount is 2904000
+node002: loadedTripleCount is 2604000
+node003: loadedTripleCount is 3204000
+node001: loadedTripleCount is 2700000
+master: loadedTripleCount is 2802000
+node004: loadedTripleCount is 2604000
+node005: loadedTripleCount is 3402000
+node006: loadedTripleCount is 3204000
+node007: loadedTripleCount is 3000000
+node003: loadedTripleCount is 3300000
+node002: loadedTripleCount is 2700000
+node001: loadedTripleCount is 2802000
+node006: loadedTripleCount is 3300000
+node005: loadedTripleCount is 3504000
+master: loadedTripleCount is 2904000
+node003: loadedTripleCount is 3402000
+node004: loadedTripleCount is 2700000
+node007: loadedTripleCount is 3102000
+node002: loadedTripleCount is 2802000
+node001: loadedTripleCount is 2904000
+node003: loadedTripleCount is 3504000
+master: loadedTripleCount is 3000000
+node005: loadedTripleCount is 3600000
+node006: loadedTripleCount is 3402000
+node004: loadedTripleCount is 2802000
+node007: loadedTripleCount is 3204000
+node002: loadedTripleCount is 2904000
+node003: loadedTripleCount is 3600000
+node001: loadedTripleCount is 3000000
+node006: loadedTripleCount is 3504000
+node005: loadedTripleCount is 3702000
+node007: loadedTripleCount is 3300000
+master: loadedTripleCount is 3102000
+node004: loadedTripleCount is 2904000
+node003: loadedTripleCount is 3702000
+node002: loadedTripleCount is 3000000
+node001: loadedTripleCount is 3102000
+node006: loadedTripleCount is 3600000
+node007: loadedTripleCount is 3402000
+node005: loadedTripleCount is 3804000
+master: loadedTripleCount is 3204000
+node004: loadedTripleCount is 3000000
+node003: loadedTripleCount is 3804000
+node002: loadedTripleCount is 3102000
+node001: loadedTripleCount is 3204000
+node003: loadedTripleCount is 3900000
+node006: loadedTripleCount is 3702000
+node005: loadedTripleCount is 3900000
+node007: loadedTripleCount is 3504000
+master: loadedTripleCount is 3300000
+node004: loadedTripleCount is 3102000
+node001: loadedTripleCount is 3300000
+node002: loadedTripleCount is 3204000
+node003: loadedTripleCount is 4002000
+node006: loadedTripleCount is 3804000
+node005: loadedTripleCount is 4002000
+master: loadedTripleCount is 3402000
+node007: loadedTripleCount is 3600000
+node004: loadedTripleCount is 3204000
+node002: loadedTripleCount is 3300000
+node003: loadedTripleCount is 4104000
+node001: loadedTripleCount is 3402000
+node006: loadedTripleCount is 3900000
+node005: loadedTripleCount is 4104000
+node007: loadedTripleCount is 3702000
+master: loadedTripleCount is 3504000
+node003: loadedTripleCount is 4200000
+node004: loadedTripleCount is 3300000
+node002: loadedTripleCount is 3402000
+node001: loadedTripleCount is 3504000
+node003: loadedTripleCount is 4302000
+node005: loadedTripleCount is 4200000
+node006: loadedTripleCount is 4002000
+node007: loadedTripleCount is 3804000
+master: loadedTripleCount is 3600000
+node004: loadedTripleCount is 3402000
+node003: loadedTripleCount is 4404000
+node001: loadedTripleCount is 3600000
+node002: loadedTripleCount is 3504000
+node005: loadedTripleCount is 4302000
+node006: loadedTripleCount is 4104000
+node007: loadedTripleCount is 3900000
+master: loadedTripleCount is 3702000
+node004: loadedTripleCount is 3504000
+node003: loadedTripleCount is 4500000
+node002: loadedTripleCount is 3600000
+node001: loadedTripleCount is 3702000
+node005: loadedTripleCount is 4404000
+node006: loadedTripleCount is 4200000
+node003: loadedTripleCount is 4602000
+node007: loadedTripleCount is 4002000
+node004: loadedTripleCount is 3600000
+master: loadedTripleCount is 3804000
+node002: loadedTripleCount is 3702000
+node001: loadedTripleCount is 3804000
+node003: loadedTripleCount is 4704000
+node006: loadedTripleCount is 4302000
+node005: loadedTripleCount is 4500000
+node007: loadedTripleCount is 4104000
+node004: loadedTripleCount is 3702000
+master: loadedTripleCount is 3900000
+node003: loadedTripleCount is 4800000
+node002: loadedTripleCount is 3804000
+node001: loadedTripleCount is 3900000
+node005: loadedTripleCount is 4602000
+node006: loadedTripleCount is 4404000
+node003: loadedTripleCount is 4902000
+node007: loadedTripleCount is 4200000
+master: loadedTripleCount is 4002000
+node004: loadedTripleCount is 3804000
+node002: loadedTripleCount is 3900000
+node001: loadedTripleCount is 4002000
+node005: loadedTripleCount is 4704000
+node006: loadedTripleCount is 4500000
+node003: loadedTripleCount is 5004000
+node007: loadedTripleCount is 4302000
+node004: loadedTripleCount is 3900000
+master: loadedTripleCount is 4104000
+node002: loadedTripleCount is 4002000
+node003: loadedTripleCount is 5100000
+node001: loadedTripleCount is 4104000
+node005: loadedTripleCount is 4800000
+node006: loadedTripleCount is 4602000
+node007: loadedTripleCount is 4404000
+node004: loadedTripleCount is 4002000
+master: loadedTripleCount is 4200000
+node001: loadedTripleCount is 4200000
+node002: loadedTripleCount is 4104000
+node003: loadedTripleCount is 5202000
+node005: loadedTripleCount is 4902000
+node006: loadedTripleCount is 4704000
+node007: loadedTripleCount is 4500000
+node004: loadedTripleCount is 4104000
+master: loadedTripleCount is 4302000
+node003: loadedTripleCount is 5304000
+node002: loadedTripleCount is 4200000
+node001: loadedTripleCount is 4302000
+node006: loadedTripleCount is 4800000
+node005: loadedTripleCount is 5004000
+node003: loadedTripleCount is 5400000
+node007: loadedTripleCount is 4602000
+master: loadedTripleCount is 4404000
+node004: loadedTripleCount is 4200000
+node002: loadedTripleCount is 4302000
+node001: loadedTripleCount is 4404000
+node005: loadedTripleCount is 5100000
+node003: loadedTripleCount is 5502000
+node006: loadedTripleCount is 4902000
+node007: loadedTripleCount is 4704000
+node004: loadedTripleCount is 4302000
+node003: loadedTripleCount is 5604000
+master: loadedTripleCount is 4500000
+node002: loadedTripleCount is 4404000
+node001: loadedTripleCount is 4500000
+node006: loadedTripleCount is 5004000
+node005: loadedTripleCount is 5202000
+node007: loadedTripleCount is 4800000
+node003: loadedTripleCount is 5700000
+node004: loadedTripleCount is 4404000
+master: loadedTripleCount is 4602000
+node002: loadedTripleCount is 4500000
+node001: loadedTripleCount is 4602000
+node006: loadedTripleCount is 5100000
+node005: loadedTripleCount is 5304000
+node003: loadedTripleCount is 5802000
+node007: loadedTripleCount is 4902000
+node002: loadedTripleCount is 4602000
+master: loadedTripleCount is 4704000
+node004: loadedTripleCount is 4500000
+node003: loadedTripleCount is 5904000
+node005: loadedTripleCount is 5400000
+node001: loadedTripleCount is 4704000
+node006: loadedTripleCount is 5202000
+node003: loadedTripleCount is 6000000
+node007: loadedTripleCount is 5004000
+node004: loadedTripleCount is 4602000
+node001: loadedTripleCount is 4800000
+master: loadedTripleCount is 4800000
+node002: loadedTripleCount is 4704000
+node006: loadedTripleCount is 5304000
+node005: loadedTripleCount is 5502000
+node003: loadedTripleCount is 6102000
+node007: loadedTripleCount is 5100000
+node002: loadedTripleCount is 4800000
+node004: loadedTripleCount is 4704000
+master: loadedTripleCount is 4902000
+node005: loadedTripleCount is 5604000
+node001: loadedTripleCount is 4902000
+node006: loadedTripleCount is 5400000
+node003: loadedTripleCount is 6204000
+node007: loadedTripleCount is 5202000
+node004: loadedTripleCount is 4800000
+node003: loadedTripleCount is 6300000
+node005: loadedTripleCount is 5700000
+node002: loadedTripleCount is 4902000
+node001: loadedTripleCount is 5004000
+node006: loadedTripleCount is 5502000
+master: loadedTripleCount is 5004000
+node003: loadedTripleCount is 6402000
+node007: loadedTripleCount is 5304000
+node005: loadedTripleCount is 5802000
+node001: loadedTripleCount is 5100000
+node004: loadedTripleCount is 4902000
+master: loadedTripleCount is 5100000
+node002: loadedTripleCount is 5004000
+node006: loadedTripleCount is 5604000
+node003: loadedTripleCount is 6504000
+node007: loadedTripleCount is 5400000
+node002: loadedTripleCount is 5100000
+node006: loadedTripleCount is 5700000
+node004: loadedTripleCount is 5004000
+node005: loadedTripleCount is 5904000
+node001: loadedTripleCount is 5202000
+node003: loadedTripleCount is 6600000
+master: loadedTripleCount is 5202000
+node007: loadedTripleCount is 5502000
+node004: loadedTripleCount is 5100000
+node005: loadedTripleCount is 6000000
+node002: loadedTripleCount is 5202000
+node001: loadedTripleCount is 5304000
+node006: loadedTripleCount is 5802000
+node003: loadedTripleCount is 6702000
+master: loadedTripleCount is 5304000
+node007: loadedTripleCount is 5604000
+node002: loadedTripleCount is 5304000
+node005: loadedTripleCount is 6102000
+node004: loadedTripleCount is 5202000
+node001: loadedTripleCount is 5400000
+node003: loadedTripleCount is 6804000
+node006: loadedTripleCount is 5904000
+master: loadedTripleCount is 5400000
+node007: loadedTripleCount is 5700000
+node003: loadedTripleCount is 6900000
+node002: loadedTripleCount is 5400000
+node005: loadedTripleCount is 6204000
+node004: loadedTripleCount is 5304000
+node001: loadedTripleCount is 5502000
+node006: loadedTripleCount is 6000000
+master: loadedTripleCount is 5502000
+node003: loadedTripleCount is 7002000
+node007: loadedTripleCount is 5802000
+node006: loadedTripleCount is 6102000
+node005: loadedTripleCount is 6300000
+node002: loadedTripleCount is 5502000
+node004: loadedTripleCount is 5400000
+node001: loadedTripleCount is 5604000
+node003: loadedTripleCount is 7104000
+master: loadedTripleCount is 5604000
+node007: loadedTripleCount is 5904000
+node005: loadedTripleCount is 6402000
+node006: loadedTripleCount is 6204000
+node001: loadedTripleCount is 5700000
+node004: loadedTripleCount is 5502000
+node002: loadedTripleCount is 5604000
+node003: loadedTripleCount is 7200000
+master: loadedTripleCount is 5700000
+node007: loadedTripleCount is 6000000
+node005: loadedTripleCount is 6504000
+node002: loadedTripleCount is 5700000
+node003: loadedTripleCount is 7302000
+node006: loadedTripleCount is 6300000
+node001: loadedTripleCount is 5802000
+node004: loadedTripleCount is 5604000
+node007: loadedTripleCount is 6102000
+master: loadedTripleCount is 5802000
+node005: loadedTripleCount is 6600000
+node003: loadedTripleCount is 7404000
+node006: loadedTripleCount is 6402000
+node004: loadedTripleCount is 5700000
+node002: loadedTripleCount is 5802000
+node001: loadedTripleCount is 5904000
+node003: loadedTripleCount is 7500000
+node007: loadedTripleCount is 6204000
+node005: loadedTripleCount is 6702000
+master: loadedTripleCount is 5904000
+node006: loadedTripleCount is 6504000
+node002: loadedTripleCount is 5904000
+node001: loadedTripleCount is 6000000
+node004: loadedTripleCount is 5802000
+node003: loadedTripleCount is 7602000
+node007: loadedTripleCount is 6300000
+node005: loadedTripleCount is 6804000
+master: loadedTripleCount is 6000000
+node006: loadedTripleCount is 6600000
+node003: loadedTripleCount is 7704000
+node002: loadedTripleCount is 6000000
+node001: loadedTripleCount is 6102000
+node004: loadedTripleCount is 5904000
+node007: loadedTripleCount is 6402000
+node005: loadedTripleCount is 6900000
+node003: loadedTripleCount is 7800000
+master: loadedTripleCount is 6102000
+node002: loadedTripleCount is 6102000
+node006: loadedTripleCount is 6702000
+node001: loadedTripleCount is 6204000
+node004: loadedTripleCount is 6000000
+node003: loadedTripleCount is 7902000
+node007: loadedTripleCount is 6504000
+node005: loadedTripleCount is 7002000
+master: loadedTripleCount is 6204000
+node006: loadedTripleCount is 6804000
+node002: loadedTripleCount is 6204000
+node001: loadedTripleCount is 6300000
+node003: loadedTripleCount is 8004000
+node004: loadedTripleCount is 6102000
+node007: loadedTripleCount is 6600000
+node005: loadedTripleCount is 7104000
+node006: loadedTripleCount is 6900000
+node003: loadedTripleCount is 8100000
+master: loadedTripleCount is 6300000
+node001: loadedTripleCount is 6402000
+node002: loadedTripleCount is 6300000
+node004: loadedTripleCount is 6204000
+node007: loadedTripleCount is 6702000
+node005: loadedTripleCount is 7200000
+node003: loadedTripleCount is 8202000
+node006: loadedTripleCount is 7002000
+master: loadedTripleCount is 6402000
+node002: loadedTripleCount is 6402000
+node001: loadedTripleCount is 6504000
+node004: loadedTripleCount is 6300000
+node003: loadedTripleCount is 8304000
+node007: loadedTripleCount is 6804000
+node005: loadedTripleCount is 7302000
+node006: loadedTripleCount is 7104000
+node001: loadedTripleCount is 6600000
+node002: loadedTripleCount is 6504000
+node003: loadedTripleCount is 8400000
+node004: loadedTripleCount is 6402000
+node007: loadedTripleCount is 6900000
+master: loadedTripleCount is 6504000
+node005: loadedTripleCount is 7404000
+node006: loadedTripleCount is 7200000
+node003: loadedTripleCount is 8502000
+node002: loadedTripleCount is 6600000
+node001: loadedTripleCount is 6702000
+node007: loadedTripleCount is 7002000
+node004: loadedTripleCount is 6504000
+master: loadedTripleCount is 6600000
+node005: loadedTripleCount is 7500000
+node003: loadedTripleCount is 8604000
+node006: loadedTripleCount is 7302000
+node002: loadedTripleCount is 6702000
+node001: loadedTripleCount is 6804000
+node004: loadedTripleCount is 6600000
+node007: loadedTripleCount is 7104000
+node005: loadedTripleCount is 7602000
+master: loadedTripleCount is 6702000
+node003: loadedTripleCount is 8700000
+node006: loadedTripleCount is 7404000
+node001: loadedTripleCount is 6900000
+node002: loadedTripleCount is 6804000
+node007: loadedTripleCount is 7200000
+node004: loadedTripleCount is 6702000
+node005: loadedTripleCount is 7704000
+node003: loadedTripleCount is 8802000
+node006: loadedTripleCount is 7500000
+master: loadedTripleCount is 6804000
+node002: loadedTripleCount is 6900000
+node001: loadedTripleCount is 7002000
+node007: loadedTripleCount is 7302000
+node003: loadedTripleCount is 8904000
+node005: loadedTripleCount is 7800000
+node004: loadedTripleCount is 6804000
+node006: loadedTripleCount is 7602000
+master: loadedTripleCount is 6900000
+node002: loadedTripleCount is 7002000
+node003: loadedTripleCount is 9000000
+node001: loadedTripleCount is 7104000
+node005: loadedTripleCount is 7902000
+node007: loadedTripleCount is 7404000
+node004: loadedTripleCount is 6900000
+node006: loadedTripleCount is 7704000
+master: loadedTripleCount is 7002000
+node003: loadedTripleCount is 9102000
+node001: loadedTripleCount is 7200000
+node002: loadedTripleCount is 7104000
+node007: loadedTripleCount is 7500000
+node004: loadedTripleCount is 7002000
+node005: loadedTripleCount is 8004000
+node006: loadedTripleCount is 7800000
+node003: loadedTripleCount is 9204000
+master: loadedTripleCount is 7104000
+node002: loadedTripleCount is 7200000
+node001: loadedTripleCount is 7302000
+node007: loadedTripleCount is 7602000
+node005: loadedTripleCount is 8100000
+node004: loadedTripleCount is 7104000
+node003: loadedTripleCount is 9300000
+node006: loadedTripleCount is 7902000
+master: loadedTripleCount is 7200000
+node001: loadedTripleCount is 7404000
+node002: loadedTripleCount is 7302000
+node007: loadedTripleCount is 7704000
+node005: loadedTripleCount is 8202000
+node003: loadedTripleCount is 9402000
+node004: loadedTripleCount is 7200000
+node006: loadedTripleCount is 8004000
+master: loadedTripleCount is 7302000
+node001: loadedTripleCount is 7500000
+node003: loadedTripleCount is 9504000
+node007: loadedTripleCount is 7800000
+node002: loadedTripleCount is 7404000
+node005: loadedTripleCount is 8304000
+node004: loadedTripleCount is 7302000
+node006: loadedTripleCount is 8100000
+master: loadedTripleCount is 7404000
+node001: loadedTripleCount is 7602000
+node003: loadedTripleCount is 9600000
+node002: loadedTripleCount is 7500000
+node007: loadedTripleCount is 7902000
+node005: loadedTripleCount is 8400000
+node004: loadedTripleCount is 7404000
+node006: loadedTripleCount is 8202000
+node003: loadedTripleCount is 9702000
+master: loadedTripleCount is 7500000
+node001: loadedTripleCount is 7704000
+node005: loadedTripleCount is 8502000
+node002: loadedTripleCount is 7602000
+node007: loadedTripleCount is 8004000
+node004: loadedTripleCount is 7500000
+node006: loadedTripleCount is 8304000
+node005: loadedTripleCount is 8604000
+node003: loadedTripleCount is 9804000
+node005: loadedTripleCount is 8700000
+node001: loadedTripleCount is 7800000
+master: loadedTripleCount is 7602000
+node002: loadedTripleCount is 7704000
+node007: loadedTripleCount is 8100000
+node005: loadedTripleCount is 8802000
+node006: loadedTripleCount is 8400000
+node004: loadedTripleCount is 7602000
+node005: loadedTripleCount is 8904000
+node003: loadedTripleCount is 9900000
+node005: loadedTripleCount is 9000000
+node001: loadedTripleCount is 7902000
+node007: loadedTripleCount is 8202000
+node002: loadedTripleCount is 7800000
+master: loadedTripleCount is 7704000
+node005: loadedTripleCount is 9102000
+node006: loadedTripleCount is 8502000
+node004: loadedTripleCount is 7704000
+node003: loadedTripleCount is 10002000
+node005: loadedTripleCount is 9204000
+node006: loadedTripleCount is 8604000
+node005: loadedTripleCount is 9300000
+node007: loadedTripleCount is 8304000
+node001: loadedTripleCount is 8004000
+master: loadedTripleCount is 7800000
+node006: loadedTripleCount is 8700000
+node002: loadedTripleCount is 7902000
+node005: loadedTripleCount is 9402000
+node004: loadedTripleCount is 7800000
+node006: loadedTripleCount is 8802000
+node003: loadedTripleCount is 10104000
+node005: loadedTripleCount is 9504000
+node001: loadedTripleCount is 8100000
+node007: loadedTripleCount is 8400000
+node006: loadedTripleCount is 8904000
+node002: loadedTripleCount is 8004000
+node005: loadedTripleCount is 9600000
+master: loadedTripleCount is 7902000
+node004: loadedTripleCount is 7902000
+node003: loadedTripleCount is 10200000
+node006: loadedTripleCount is 9000000
+node005: loadedTripleCount is 9702000
+node001: loadedTripleCount is 8202000
+node007: loadedTripleCount is 8502000
+node005: loadedTripleCount is 9804000
+node002: loadedTripleCount is 8100000
+node006: loadedTripleCount is 9102000
+master: loadedTripleCount is 8004000
+node003: loadedTripleCount is 10302000
+node004: loadedTripleCount is 8004000
+node005: loadedTripleCount is 9900000
+node001: loadedTripleCount is 8304000
+node007: loadedTripleCount is 8604000
+node006: loadedTripleCount is 9204000
+node003: loadedTripleCount is 10404000
+node002: loadedTripleCount is 8202000
+master: loadedTripleCount is 8100000
+node005: loadedTripleCount is 10002000
+node004: loadedTripleCount is 8100000
+node007: loadedTripleCount is 8700000
+node006: loadedTripleCount is 9300000
+node001: loadedTripleCount is 8400000
+node002: loadedTripleCount is 8304000
+master: loadedTripleCount is 8202000
+node003: loadedTripleCount is 10500000
+node005: loadedTripleCount is 10104000
+node004: loadedTripleCount is 8202000
+node007: loadedTripleCount is 8802000
+node006: loadedTripleCount is 9402000
+node005: loadedTripleCount is 10200000
+node001: loadedTripleCount is 8502000
+node003: loadedTripleCount is 10602000
+node002: loadedTripleCount is 8400000
+master: loadedTripleCount is 8304000
+node004: loadedTripleCount is 8304000
+node007: loadedTripleCount is 8904000
+node006: loadedTripleCount is 9504000
+node005: loadedTripleCount is 10302000
+master: loadedTripleCount is 8400000
+node002: loadedTripleCount is 8502000
+node003: loadedTripleCount is 10704000
+node001: loadedTripleCount is 8604000
+node004: loadedTripleCount is 8400000
+master: loadedTripleCount is 8502000
+node007: loadedTripleCount is 9000000
+node006: loadedTripleCount is 9600000
+node005: loadedTripleCount is 10404000
+node004: loadedTripleCount is 8502000
+node003: loadedTripleCount is 10800000
+node002: loadedTripleCount is 8604000
+node001: loadedTripleCount is 8700000
+node007: loadedTripleCount is 9102000
+master: loadedTripleCount is 8604000
+node006: loadedTripleCount is 9702000
+node005: loadedTripleCount is 10500000
+node004: loadedTripleCount is 8604000
+node003: loadedTripleCount is 10902000
+node002: loadedTripleCount is 8700000
+node001: loadedTripleCount is 8802000
+node007: loadedTripleCount is 9204000
+node005: loadedTripleCount is 10602000
+node006: loadedTripleCount is 9804000
+master: loadedTripleCount is 8700000
+node002: loadedTripleCount is 8802000
+node004: loadedTripleCount is 8700000
+node003: loadedTripleCount is 11004000
+node001: loadedTripleCount is 8904000
+node007: loadedTripleCount is 9300000
+node005: loadedTripleCount is 10704000
+master: loadedTripleCount is 8802000
+node006: loadedTripleCount is 9900000
+node003: loadedTripleCount is 11100000
+node004: loadedTripleCount is 8802000
+node002: loadedTripleCount is 8904000
+node001: loadedTripleCount is 9000000
+node005: loadedTripleCount is 10800000
+node007: loadedTripleCount is 9402000
+node006: loadedTripleCount is 10002000
+master: loadedTripleCount is 8904000
+node002: loadedTripleCount is 9000000
+node003: loadedTripleCount is 11202000
+node004: loadedTripleCount is 8904000
+node001: loadedTripleCount is 9102000
+node005: loadedTripleCount is 10902000
+node007: loadedTripleCount is 9504000
+master: loadedTripleCount is 9000000
+node006: loadedTripleCount is 10104000
+node003: loadedTripleCount is 11304000
+node002: loadedTripleCount is 9102000
+node004: loadedTripleCount is 9000000
+node001: loadedTripleCount is 9204000
+node005: loadedTripleCount is 11004000
+node007: loadedTripleCount is 9600000
+node006: loadedTripleCount is 10200000
+node002: loadedTripleCount is 9204000
+master: loadedTripleCount is 9102000
+node003: loadedTripleCount is 11400000
+node004: loadedTripleCount is 9102000
+node001: loadedTripleCount is 9300000
+node005: loadedTripleCount is 11100000
+node007: loadedTripleCount is 9702000
+node006: loadedTripleCount is 10302000
+master: loadedTripleCount is 9204000
+node003: loadedTripleCount is 11502000
+node002: loadedTripleCount is 9300000
+node004: loadedTripleCount is 9204000
+node005: loadedTripleCount is 11202000
+node001: loadedTripleCount is 9402000
+node007: loadedTripleCount is 9804000
+node006: loadedTripleCount is 10404000
+node002: loadedTripleCount is 9402000
+master: loadedTripleCount is 9300000
+node003: loadedTripleCount is 11604000
+node004: loadedTripleCount is 9300000
+node005: loadedTripleCount is 11304000
+node001: loadedTripleCount is 9504000
+node007: loadedTripleCount is 9900000
+node006: loadedTripleCount is 10500000
+master: loadedTripleCount is 9402000
+node003: loadedTripleCount is 11700000
+node002: loadedTripleCount is 9504000
+node005: loadedTripleCount is 11400000
+node004: loadedTripleCount is 9402000
+node001: loadedTripleCount is 9600000
+node007: loadedTripleCount is 10002000
+node006: loadedTripleCount is 10602000
+node002: loadedTripleCount is 9600000
+node003: loadedTripleCount is 11802000
+node001: loadedTripleCount is 9702000
+master: loadedTripleCount is 9504000
+node005: loadedTripleCount is 11502000
+node004: loadedTripleCount is 9504000
+node007: loadedTripleCount is 10104000
+node006: loadedTripleCount is 10704000
+node002: loadedTripleCount is 9702000
+node003: loadedTripleCount is 11904000
+master: loadedTripleCount is 9600000
+node004: loadedTripleCount is 9600000
+node005: loadedTripleCount is 11604000
+node001: loadedTripleCount is 9804000
+node007: loadedTripleCount is 10200000
+node006: loadedTripleCount is 10800000
+node002: loadedTripleCount is 9804000
+node003: loadedTripleCount is 12000000
+node005: loadedTripleCount is 11700000
+node001: loadedTripleCount is 9900000
+node004: loadedTripleCount is 9702000
+master: loadedTripleCount is 9702000
+node007: loadedTripleCount is 10302000
+node006: loadedTripleCount is 10902000
+node002: loadedTripleCount is 9900000
+node003: loadedTripleCount is 12102000
+node005: loadedTripleCount is 11802000
+node004: loadedTripleCount is 9804000
+master: loadedTripleCount is 9804000
+node001: loadedTripleCount is 10002000
+node007: loadedTripleCount is 10404000
+node006: loadedTripleCount is 11004000
+node002: loadedTripleCount is 10002000
+node005: loadedTripleCount is 11904000
+node003: loadedTripleCount is 12204000
+node004: loadedTripleCount is 9900000
+node007: loadedTripleCount is 10500000
+node001: loadedTripleCount is 10104000
+master: loadedTripleCount is 9900000
+node006: loadedTripleCount is 11100000
+node002: loadedTripleCount is 10104000
+node005: loadedTripleCount is 12000000
+node003: loadedTripleCount is 12300000
+node007: loadedTripleCount is 10602000
+node001: loadedTripleCount is 10200000
+node004: loadedTripleCount is 10002000
+master: loadedTripleCount is 10002000
+node006: loadedTripleCount is 11202000
+node002: loadedTripleCount is 10200000
+node005: loadedTripleCount is 12102000
+node003: loadedTripleCount is 12402000
+node007: loadedTripleCount is 10704000
+node004: loadedTripleCount is 10104000
+master: loadedTripleCount is 10104000
+node001: loadedTripleCount is 10302000
+node006: loadedTripleCount is 11304000
+node002: loadedTripleCount is 10302000
+node005: loadedTripleCount is 12204000
+node007: loadedTripleCount is 10800000
+node003: loadedTripleCount is 12504000
+Finished inserting - waiting for threadpool to catch up
+node004: loadedTripleCount is 10200000
+node001: loadedTripleCount is 10404000
+node006: loadedTripleCount is 11400000
+master: loadedTripleCount is 10200000
+Loaded 12577734 triples.
+Finished loading data in 668.564 secs
+node002: loadedTripleCount is 10404000
+node005: loadedTripleCount is 12300000
+node007: loadedTripleCount is 10902000
+node001: loadedTripleCount is 10500000
+node004: loadedTripleCount is 10302000
+node006: loadedTripleCount is 11502000
+master: loadedTripleCount is 10302000
+node005: loadedTripleCount is 12402000
+node002: loadedTripleCount is 10500000
+node007: loadedTripleCount is 11004000
+node001: loadedTripleCount is 10602000
+node004: loadedTripleCount is 10404000
+node006: loadedTripleCount is 11604000
+node002: loadedTripleCount is 10602000
+node005: loadedTripleCount is 12504000
+master: loadedTripleCount is 10404000
+node007: loadedTripleCount is 11100000
+Finished inserting - waiting for threadpool to catch up
+node006: loadedTripleCount is 11700000
+Loaded 12579340 triples.
+Finished loading data in 682.863 secs
+node001: loadedTripleCount is 10704000
+node004: loadedTripleCount is 10500000
+node002: loadedTripleCount is 10704000
+master: loadedTripleCount is 10500000
+node007: loadedTripleCount is 11202000
+node006: loadedTripleCount is 11802000
+node001: loadedTripleCount is 10800000
+node004: loadedTripleCount is 10602000
+node002: loadedTripleCount is 10800000
+node007: loadedTripleCount is 11304000
+node006: loadedTripleCount is 11904000
+master: loadedTripleCount is 10602000
+node001: loadedTripleCount is 10902000
+node004: loadedTripleCount is 10704000
+node002: loadedTripleCount is 10902000
+node007: loadedTripleCount is 11400000
+node006: loadedTripleCount is 12000000
+master: loadedTripleCount is 10704000
+node004: loadedTripleCount is 10800000
+node001: loadedTripleCount is 11004000
+node002: loadedTripleCount is 11004000
+node007: loadedTripleCount is 11502000
+node006: loadedTripleCount is 12102000
+master: loadedTripleCount is 10800000
+node001: loadedTripleCount is 11100000
+node004: loadedTripleCount is 10902000
+node002: loadedTripleCount is 11100000
+node007: loadedTripleCount is 11604000
+node006: loadedTripleCount is 12204000
+master: loadedTripleCount is 10902000
+node001: loadedTripleCount is 11202000
+node002: loadedTripleCount is 11202000
+node007: loadedTripleCount is 11700000
+node006: loadedTripleCount is 12300000
+node004: loadedTripleCount is 11004000
+master: loadedTripleCount is 11004000
+node001: loadedTripleCount is 11304000
+node002: loadedTripleCount is 11304000
+node007: loadedTripleCount is 11802000
+node006: loadedTripleCount is 12402000
+node004: loadedTripleCount is 11100000
+master: loadedTripleCount is 11100000
+node001: loadedTripleCount is 11400000
+node002: loadedTripleCount is 11400000
+node007: loadedTripleCount is 11904000
+node004: loadedTripleCount is 11202000
+node006: loadedTripleCount is 12504000
+Finished inserting - waiting for threadpool to catch up
+node001: loadedTripleCount is 11502000
+Loaded 12579250 triples.
+Finished loading data in 720.594 secs
+master: loadedTripleCount is 11202000
+node002: loadedTripleCount is 11502000
+node007: loadedTripleCount is 12000000
+node004: loadedTripleCount is 11304000
+node007: loadedTripleCount is 12102000
+master: loadedTripleCount is 11304000
+node002: loadedTripleCount is 11604000
+node001: loadedTripleCount is 11604000
+node004: loadedTripleCount is 11400000
+node001: loadedTripleCount is 11700000
+node002: loadedTripleCount is 11700000
+master: loadedTripleCount is 11400000
+node007: loadedTripleCount is 12204000
+node004: loadedTripleCount is 11502000
+node002: loadedTripleCount is 11802000
+node007: loadedTripleCount is 12300000
+node001: loadedTripleCount is 11802000
+master: loadedTripleCount is 11502000
+node004: loadedTripleCount is 11604000
+node002: loadedTripleCount is 11904000
+node007: loadedTripleCount is 12402000
+node001: loadedTripleCount is 11904000
+master: loadedTripleCount is 11604000
+node004: loadedTripleCount is 11700000
+node002: loadedTripleCount is 12000000
+node001: loadedTripleCount is 12000000
+node007: loadedTripleCount is 12504000
+Finished inserting - waiting for threadpool to catch up
+Loaded 12576128 triples.
+Finished loading data in 741.431 secs
+node004: loadedTripleCount is 11802000
+node002: loadedTripleCount is 12102000
+node001: loadedTripleCount is 12102000
+master: loadedTripleCount is 11700000
+node004: loadedTripleCount is 11904000
+node002: loadedTripleCount is 12204000
+node001: loadedTripleCount is 12204000
+master: loadedTripleCount is 11802000
+node002: loadedTripleCount is 12300000
+node004: loadedTripleCount is 12000000
+node001: loadedTripleCount is 12300000
+master: loadedTripleCount is 11904000
+node002: loadedTripleCount is 12402000
+node001: loadedTripleCount is 12402000
+node004: loadedTripleCount is 12102000
+master: loadedTripleCount is 12000000
+node002: loadedTripleCount is 12504000
+node001: loadedTripleCount is 12504000
+node004: loadedTripleCount is 12204000
+Finished inserting - waiting for threadpool to catch up
+Loaded 12580320 triples.
+Finished loading data in 756.249 secs
+Finished inserting - waiting for threadpool to catch up
+Loaded 12580386 triples.
+Finished loading data in 756.445 secs
+master: loadedTripleCount is 12102000
+node004: loadedTripleCount is 12300000
+master: loadedTripleCount is 12204000
+node004: loadedTripleCount is 12402000
+master: loadedTripleCount is 12300000
+node004: loadedTripleCount is 12504000
+Finished inserting - waiting for threadpool to catch up
+Loaded 12586246 triples.
+Finished loading data in 764.796 secs
+master: loadedTripleCount is 12402000
+master: loadedTripleCount is 12504000
+Finished inserting - waiting for threadpool to catch up
+Loaded 12577510 triples.
+Finished loading data in 769.741 secs
+
+real	12m50.626s
+user	0m0.084s
+sys	0m0.108s
