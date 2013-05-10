@@ -1,28 +1,33 @@
-/*
- * (C) Copyright 2011 - Juan F. Sequeda and Daniel P. Miranker
- * Permission to use this code is only granted by separate license 
+/**
+ * Copyright (C) 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.drewshafer.sparql.backend.redis;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
-import java.util.Queue;
 
-import redis.clients.jedis.Jedis;
 import com.drewshafer.sparql.backend.redis.operators.*;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.OpVisitor;
 import com.hp.hpl.jena.sparql.algebra.op.OpAssign;
@@ -59,17 +64,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpTopN;
 import com.hp.hpl.jena.sparql.algebra.op.OpTriple;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.core.VarExprList;
 import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.ExprAggregator;
-import com.hp.hpl.jena.sparql.expr.ExprList;
-
-//import translate.sql.BGP;
-//import translate.sql.JOIN;
-//import translate.sql.LEFTJOIN;
-//import translate.sql.SqlExpr;
-//import translate.sql.SqlOP;
-//import translate.sql.UNION;
 
 public class SPARQLRedisVisitor implements OpVisitor 
 {
@@ -290,6 +285,18 @@ public class SPARQLRedisVisitor implements OpVisitor
 			}
 		}
 	}
+
+	public void visit(OpSlice arg0) 
+	{
+		this.redisOpStack.push(new ReducePhaseSlice(this.redisOpStack.peek(), arg0.getStart(), arg0.getLength()));
+	}
+
+//                         _               ___                                 
+//    /\  /\___ _ __ ___  | |__   ___     /   \_ __ __ _  __ _  ___  _ __  ___ 
+//   / /_/ / _ \ '__/ _ \ | '_ \ / _ \   / /\ / '__/ _` |/ _` |/ _ \| '_ \/ __|
+//  / __  /  __/ | |  __/ | |_) |  __/  / /_//| | | (_| | (_| | (_) | | | \__ \
+//  \/ /_/ \___|_|  \___| |_.__/ \___| /___,' |_|  \__,_|\__, |\___/|_| |_|___/
+//                                                       |___/                 
 	
 	public void visit(OpGroup arg0) 
 	{
@@ -299,38 +306,9 @@ public class SPARQLRedisVisitor implements OpVisitor
 	public void visit(OpExtend arg0) 
 	{
 		throw new UnsupportedOperationException();
-//		System.out.println(">>>> extend  = " + arg0 );
-//		VarExprList varExprList = arg0.getVarExprList();
-//		
-//		Iterator<Entry<Var, Expr>> it = varExprList.getExprs().entrySet().iterator();
-//	    while (it.hasNext()) {
-//	        Entry<Var, Expr> pairs = it.next();
-//	        String keyVarName = pairs.getKey().getVarName();
-//	        Expr valueExpression = pairs.getValue();
-//	        
-//	        
-//	        SqlExpr expr = new SqlExpr(baseURI);
-//        	valueExpression.visit(expr);
-//        	//System.out.println("expr = "+expr);
-//        	sqlOpStack.peek().addExtend(keyVarName, expr);
-//	        
-//	    }
-	}
-	
 
-
-	public void visit(OpSlice arg0) 
-	{
-		this.redisOpStack.push(new ReducePhaseSlice(this.redisOpStack.peek(), arg0.getStart(), arg0.getLength()));
 	}
 
-	
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 	public void visit(OpQuadPattern arg0) 
 	{
 		throw new UnsupportedOperationException("OpQuadPattern Not implemented");
@@ -438,7 +416,5 @@ public class SPARQLRedisVisitor implements OpVisitor
 	}
 
 	public void optimize() {
-		// TODO Auto-generated method stub
-		
 	}
 }
